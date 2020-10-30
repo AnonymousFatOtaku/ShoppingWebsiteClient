@@ -2,7 +2,8 @@
 import React, {Component} from "react";
 import {BrowserRouter, Switch, Route} from 'react-router-dom'
 // 引入组件，首字母必须大写
-import Login from './pages/login/login'
+import UserLogin from './pages/user_login/user_login'
+import AdminLogin from './pages/admin_login/admin_login'
 import './App.less';
 
 export default class App extends Component {
@@ -10,7 +11,10 @@ export default class App extends Component {
   render() {
     return (
       <BrowserRouter>
-        <Route path='/login' component={Login}/>
+        <Switch>{/*只匹配其中一个*/}
+          <Route path='/UserLogin' component={UserLogin}/>
+          <Route path='/AdminLogin' component={AdminLogin}/>
+        </Switch>
       </BrowserRouter>
     )
   }

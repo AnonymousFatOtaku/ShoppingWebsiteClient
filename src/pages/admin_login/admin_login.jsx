@@ -4,8 +4,8 @@ import {Redirect} from 'react-router-dom'
 import {Form, Input, Button, message} from 'antd';
 import {UserOutlined, LockOutlined} from '@ant-design/icons';
 import logo from '../../assets/images/logo.gif'
-import './login.less'
-import {reqLogin} from '../../api/index'
+import './admin_login.less'
+import {reqAdminLogin} from '../../api/index'
 
 export default class Login extends Component {
 
@@ -13,7 +13,7 @@ export default class Login extends Component {
 
     // onFinish为提交表单且数据验证成功后的回调事件，values即表单数据，分别在输入过程中和点击登录按钮时进行验证
     const onFinish = async values => {
-      const result = await reqLogin(values.username, values.password)
+      const result = await reqAdminLogin(values.username, values.password)
       if (result.status === 0) { // 登录成功
         // 提示登录成功
         message.success('登录成功')
