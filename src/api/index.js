@@ -5,3 +5,10 @@ import ajax from './ajax'
 export const reqUserLogin = (username, password) => ajax('/user/userLogin', {username, password}, 'POST')
 // 管理员登录
 export const reqAdminLogin = (username, password) => ajax('/admin/adminLogin', {username, password}, 'POST')
+// 用户注册
+export const reqRegister = (username, password, phone, email) => ajax('/user/addUser', {
+  username,
+  password,
+  phone,
+  email
+}, 'POST')

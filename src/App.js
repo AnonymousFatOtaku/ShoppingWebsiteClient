@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route} from 'react-router-dom'
 // 引入组件，首字母必须大写
 import UserLogin from './pages/user_login/user_login'
 import AdminLogin from './pages/admin_login/admin_login'
+import Register from './pages/register/register'
 import './App.less';
 
 export default class App extends Component {
@@ -14,6 +15,7 @@ export default class App extends Component {
         <Switch>{/*只匹配其中一个*/}
           <Route path='/UserLogin' component={UserLogin}/>
           <Route path='/AdminLogin' component={AdminLogin}/>
+          <Route path='/Register' component={Register}/>
         </Switch>
       </BrowserRouter>
     )

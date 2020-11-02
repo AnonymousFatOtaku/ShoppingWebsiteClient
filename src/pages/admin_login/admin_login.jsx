@@ -56,7 +56,7 @@ export default class Login extends Component {
               </Button>
             </Form.Item>
             <Form.Item>
-              <Button type="primary" className="login-form-button">
+              <Button type="primary" className="login-form-button" onClick={() => this.props.history.push('/Register')}>
                 注册
               </Button>
             </Form.Item>
