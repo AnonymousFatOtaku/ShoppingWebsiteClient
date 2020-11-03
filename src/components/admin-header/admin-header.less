@@ -1,0 +1,60 @@
+.ant-layout-header {
+  padding: 0 !important;
+  height: 100px !important;
+
+  .adminHeader {
+    background-color: white;
+    height: 100px;
+
+    .adminHeader-userInfo {
+      height: 50px;
+      text-align: right;
+      line-height: 50px;
+      padding-right: 50px;
+      border-bottom: 1px solid green;
+
+      span {
+        margin-right: 10px;
+      }
+    }
+
+    .adminHeader-pageInfo {
+      height: 50px;
+      display: flex;
+      align-items: center;
+
+      .adminHeader-pageInfo-title {
+        width: 25%;
+        height: 50px;
+        text-align: center;
+        font-size: 20px;
+        position: relative;
+
+        // 绘制倒三角
+        &::after {
+          content: "";
+          position: absolute;
+          right: 50%;
+          transform: translateX(50%);
+          top: 100%;
+          border-left: 20px solid transparent;
+          border-right: 20px solid transparent;
+          border-top: 20px solid white;
+        }
+      }
+
+      .adminHeader-pageInfo-time {
+        width: 75%;
+        height: 50px;
+        text-align: right;
+        padding-right: 40px;
+
+        img {
+          height: 30px;
+          width: 30px;
+          margin: 0 10px;
+        }
+      }
+    }
+  }
+}

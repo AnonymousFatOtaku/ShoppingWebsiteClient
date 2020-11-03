@@ -6,6 +6,9 @@ import {UserOutlined, LockOutlined} from '@ant-design/icons';
 import logo from '../../assets/images/logo.gif'
 import './admin_login.less'
 import {reqAdminLogin} from '../../api/index'
+import memoryUtils from "../../utils/memoryUtils";
+import storageUtils from "../../utils/storageUtils";
+import cookieUtils from "../../utils/cookieUtils";
 
 export default class Login extends Component {
 
@@ -15,12 +18,28 @@ export default class Login extends Component {
 
   render() {
 
+    // 如果管理员已经登录则自动跳转到管理界面
+    const user = cookieUtils.getUserCookie()
+    console.log(user)
+    if (user && user.pk_user_id) {
+      return <Redirect to='/'/>
+    }
+
     // onFinish为提交表单且数据验证成功后的回调事件，values即表单数据，分别在输入过程中和点击登录按钮时进行验证
     const onFinish = async values => {
       const result = await reqAdminLogin(values.username, values.password)
       if (result.status === 0) { // 登录成功
         // 提示登录成功
         message.success('登录成功')
+        // 保存user
+        const user = result.data
+        cookieUtils.saveUserCookie(user)
+        console.log(cookieUtils.getUserCookie())
+        // memoryUtils.user = user // 保存在内存中
+        // storageUtils.saveUser(user) // 保存到local中
+        // console.log(storageUtils.getUser())
+        // 跳转到管理界面 (不需要再回退到登录)
+        this.props.history.replace('/')
       } else { // 登录失败
         // 提示错误信息
         message.error(result.msg)

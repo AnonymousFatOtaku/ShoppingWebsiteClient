@@ -5,6 +5,7 @@ import {BrowserRouter, Switch, Route} from 'react-router-dom'
 import UserLogin from './pages/user_login/user_login'
 import AdminLogin from './pages/admin_login/admin_login'
 import Register from './pages/register/register'
+import Admin from './pages/admin/admin'
 import './App.less';
 
 export default class App extends Component {
@@ -16,6 +17,7 @@ export default class App extends Component {
           <Route path='/UserLogin' component={UserLogin}/>
           <Route path='/AdminLogin' component={AdminLogin}/>
           <Route path='/Register' component={Register}/>
+          <Route path='/' component={Admin}/>
         </Switch>
       </BrowserRouter>
     )
