@@ -52,7 +52,7 @@ export default class Admin extends Component {
 
   render() {
     const user = cookieUtils.getUserCookie()
-    console.log(user)
+    // console.log(user)
     // 如果内存没有存储user代表当前没有登录，自动跳转到登录(在render()中)
     if (!user || !user.pk_user_id) {
       return <Redirect to='/AdminLogin'/>

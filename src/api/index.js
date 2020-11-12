@@ -14,6 +14,8 @@ export const reqRegister = (username, password, phone, email) => ajax('/user/add
   phone,
   email
 }, 'POST')
+// 获取当前登录用户权限列表
+export const reqRights = (pk_user_id) => ajax('/right/getRightsByUserId', {pk_user_id})
 // 获取一级/二级分类的列表
 export const reqCategorys = (parentId) => ajax('/manage/category/list', {parentId})
 // 添加分类
@@ -37,8 +39,6 @@ export const reqSearchProducts = ({pageNum, pageSize, searchName, searchType}) =
 })
 // 获取一个分类
 export const reqCategory = (categoryId) => ajax('/manage/category/info', {categoryId})
-// 获取所有角色的列表
-export const reqRoles = () => ajax('/manage/role/list')
 // 添加角色
 export const reqAddRole = (roleName) => ajax('/manage/role/add', {roleName}, 'POST')
 // 更新角色
