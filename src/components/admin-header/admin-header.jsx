@@ -58,8 +58,10 @@ class AdminHeader extends Component {
     Modal.confirm({
       content: '是否确认退出?',
       onOk: () => {
-        // 删除保存的user数据
+        // 删除保存的user数据和token
         cookieUtils.removeUserCookie()
+        localStorage.removeItem('token')
+        console.log(localStorage.getItem('token'))
         // 跳转到login
         this.props.history.replace('/AdminLogin')
       }

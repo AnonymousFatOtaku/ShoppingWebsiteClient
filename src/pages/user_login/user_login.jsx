@@ -8,6 +8,7 @@ import './user_login.less'
 import {reqUserLogin} from '../../api/index'
 import memoryUtils from "../../utils/memoryUtils";
 import storageUtils from "../../utils/storageUtils";
+import cookieUtils from "../../utils/cookieUtils";
 
 export default class Login extends Component {
 
@@ -26,15 +27,19 @@ export default class Login extends Component {
     // onFinish为提交表单且数据验证成功后的回调事件，values即表单数据，分别在输入过程中和点击登录按钮时进行验证
     const onFinish = async values => {
       const result = await reqUserLogin(values.username, values.password)
+      // console.log(result)
       if (result.status === 0) { // 登录成功
         // 提示登录成功
         message.success('登录成功')
         // 保存user
         const user = result.data
-        memoryUtils.user = user // 保存在内存中
-        storageUtils.saveUser(user) // 保存到local中
+        cookieUtils.saveUserCookie(user)
+        // 保存token到localStorage中
+        localStorage.setItem('token', result.token)
+        console.log(cookieUtils.getUserCookie())
+        console.log(localStorage.getItem('token'))
         // 跳转到管理界面 (不需要再回退到登录)
-        this.props.history.replace('/')
+        // this.props.history.replace('/')
       } else { // 登录失败
         // 提示错误信息
         message.error(result.msg)

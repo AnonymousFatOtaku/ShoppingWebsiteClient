@@ -12,9 +12,19 @@ export default function ajax(url, data = {}, method = 'GET') {
     let promise
     // 执行异步ajax请求
     if (method === 'GET') {
-      promise = axios.get(url, {params: data}) // params配置指定的是query参数
+      promise = axios.get(url, {
+          params: data, // params配置指定的是query参数
+          headers: {
+            'Token': localStorage.getItem('token')
+          }
+        }
+      )
     } else {
-      promise = axios.post(url, data)
+      promise = axios.post(url, data, {
+        headers: {
+          'Token': localStorage.getItem('token')
+        },
+      })
     }
     promise.then(response => {
       // 如果成功则调用resolve(response.data)

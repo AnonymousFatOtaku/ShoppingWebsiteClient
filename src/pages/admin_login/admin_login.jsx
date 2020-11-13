@@ -34,10 +34,10 @@ export default class Login extends Component {
         // 保存user
         const user = result.data
         cookieUtils.saveUserCookie(user)
+        // 保存token到localStorage中
+        localStorage.setItem('token', result.token)
         console.log(cookieUtils.getUserCookie())
-        // memoryUtils.user = user // 保存在内存中
-        // storageUtils.saveUser(user) // 保存到local中
-        // console.log(storageUtils.getUser())
+        console.log(localStorage.getItem('token'))
         // 跳转到管理界面 (不需要再回退到登录)
         this.props.history.replace('/')
       } else { // 登录失败
