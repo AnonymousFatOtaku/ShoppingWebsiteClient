@@ -10,7 +10,7 @@ import Home from "../home/home";
 // import Bar from "../bar/bar";
 // import Line from "../line/line";
 // import Pie from "../pie/pie";
-// import Role from "../role/role";
+import Role from "../role/role";
 // import User from "../user/user";
 // import Order from "../order/order";
 // import UserOrder from "../user-order/user-order";
@@ -76,38 +76,38 @@ export default class Admin extends Component {
             <Switch>
               <Redirect from='/' exact to='/home'/>
               <Route path='/home' component={Home}/>
-              {/*<Route path='/category' component={Category}>
-                {menus.indexOf("/category") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path='/product' component={Product}>
-                {menus.indexOf("/product") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path='/user' component={User}>
-                {menus.indexOf("/user") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
+              {/*<Route path='/category' component={Category}>*/}
+              {/*  {menus.indexOf("/category") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path='/product' component={Product}>*/}
+              {/*  {menus.indexOf("/product") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path='/user' component={User}>*/}
+              {/*  {menus.indexOf("/user") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
               <Route path='/role' component={Role}>
-                {menus.indexOf("/role") === -1 ? <Redirect to="/home"/> : null}
+              {/*  {menus.indexOf("/role") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
-              <Route path="/bar" component={Bar}>
-                {menus.indexOf("/bar") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path="/pie" component={Pie}>
-                {menus.indexOf("/pie") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path="/line" component={Line}>
-                {menus.indexOf("/line") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path="/order" component={Order}>
-                {menus.indexOf("/order") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path="/userProduct" component={UserProduct}>
-                {menus.indexOf("/userProduct") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path="/userOrder" component={UserOrder}>
-                {menus.indexOf("/userOrder") === -1 ? <Redirect to="/home"/> : null}
-              </Route>
-              <Route path="/ProductInfo" component={ProductInfo}> </Route>
-              <Route component={NotFound}/>*/}
+              {/*<Route path="/bar" component={Bar}>*/}
+              {/*  {menus.indexOf("/bar") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path="/pie" component={Pie}>*/}
+              {/*  {menus.indexOf("/pie") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path="/line" component={Line}>*/}
+              {/*  {menus.indexOf("/line") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path="/order" component={Order}>*/}
+              {/*  {menus.indexOf("/order") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path="/userProduct" component={UserProduct}>*/}
+              {/*  {menus.indexOf("/userProduct") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path="/userOrder" component={UserOrder}>*/}
+              {/*  {menus.indexOf("/userOrder") === -1 ? <Redirect to="/home"/> : null}*/}
+              {/*</Route>*/}
+              {/*<Route path="/ProductInfo" component={ProductInfo}> </Route>*/}
+              {/*<Route component={NotFound}/>*/}
             </Switch>
           </Content>
           <Footer className="adminFooter">欢迎使用后台管理系统</Footer>

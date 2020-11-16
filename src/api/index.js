@@ -16,6 +16,8 @@ export const reqRegister = (username, password, phone, email) => ajax('/user/add
 }, 'POST')
 // 获取当前登录用户权限列表
 export const reqRights = (pk_user_id) => ajax('/right/getRightsByUserId', {pk_user_id})
+// 获取所有角色的列表
+export const reqRoles = () => ajax('/role/getAllRoles')
 // 获取一级/二级分类的列表
 export const reqCategorys = (parentId) => ajax('/manage/category/list', {parentId})
 // 添加分类
@@ -85,7 +87,7 @@ export const reqUserSearchOrders = ({pageNum, pageSize, searchName, searchType, 
 // 获取当前IP所在地天气
 export const reqWeather = () => {
   return new Promise((resolve, reject) => {
-    const url = `https://v0.yiketianqi.com/api?version=v61&appid=47291758&appsecret=35G6DoPc`
+    const url = `https://v0.yiketianqi.com/api?version=v61&appid=56683117&appsecret=qnX1AML8`
     // 发送jsonp请求
     jsonp(url, {}, (err, data) => {
       if (!err && data) { // 如果没有错误且有获取到数据

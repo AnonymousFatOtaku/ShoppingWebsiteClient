@@ -53,7 +53,7 @@ class AdminSider extends Component {
   render() {
 
     const {menus} = this.state
-    console.log(menus)
+    // console.log(menus)
 
     // 获取当前请求的路由路径
     let path = this.props.location.pathname
