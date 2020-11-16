@@ -61,7 +61,6 @@ class AdminHeader extends Component {
         // 删除保存的user数据和token
         cookieUtils.removeUserCookie()
         localStorage.removeItem('token')
-        console.log(localStorage.getItem('token'))
         // 跳转到login
         this.props.history.replace('/AdminLogin')
       }
