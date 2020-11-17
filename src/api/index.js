@@ -18,6 +18,14 @@ export const reqRegister = (username, password, phone, email) => ajax('/user/add
 export const reqRights = (pk_user_id) => ajax('/right/getRightsByUserId', {pk_user_id})
 // 获取所有角色的列表
 export const reqRoles = () => ajax('/role/getAllRoles')
+// 添加角色
+export const reqAddRole = (parent_role_id, name, description) => ajax('/role/addRole', {
+  parent_role_id,
+  name,
+  description
+}, 'POST')
+// 更新角色
+export const reqUpdateRole = (role) => ajax('/manage/role/update', role, 'POST')
 // 获取一级/二级分类的列表
 export const reqCategorys = (parentId) => ajax('/manage/category/list', {parentId})
 // 添加分类
@@ -41,10 +49,6 @@ export const reqSearchProducts = ({pageNum, pageSize, searchName, searchType}) =
 })
 // 获取一个分类
 export const reqCategory = (categoryId) => ajax('/manage/category/info', {categoryId})
-// 添加角色
-export const reqAddRole = (roleName) => ajax('/manage/role/add', {roleName}, 'POST')
-// 更新角色
-export const reqUpdateRole = (role) => ajax('/manage/role/update', role, 'POST')
 // 获取所有用户的列表
 export const reqUsers = () => ajax('/manage/user/list')
 // 删除指定用户

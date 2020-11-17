@@ -1,11 +1,13 @@
 // 角色管理路由
 import React, {Component} from "react";
-import {Button, Card, Table, Modal, Form, Input, message} from 'antd';
+import {Button, Card, Table, Modal, Form, Input, message, Select} from 'antd';
 import {reqRoles, reqAddRole, reqUpdateRole} from '../../api'
 import memoryUtils from "../../utils/memoryUtils"
 import {formateDate} from '../../utils/dateUtils'
 import storageUtils from "../../utils/storageUtils";
 import AuthForm from './auth-form'
+
+const {TextArea} = Input;
 
 export default class Role extends Component {
 
@@ -14,6 +16,7 @@ export default class Role extends Component {
     role: {}, // 选中的role
     isShowAdd: false, // 是否显示添加界面
     isShowAuth: false, // 是否显示设置权限界面
+    parentId: '0', // 当前需要显示的分类列表的父分类ID
   }
 
   formRef = React.createRef();
@@ -79,46 +82,55 @@ export default class Role extends Component {
   }
 
   // 添加角色
-  // addRole = async () => {
-  //   // 隐藏确认框
-  //   this.setState({
-  //     isShowAdd: false
-  //   })
-  //   // 收集输入数据
-  //   const {roleName} = this.formRef.current.getFieldsValue({roleName: String})
-  //   // console.log(roleName)
-  //
-  //   // 判断角色名是否为空或以空格开头
-  //   if (roleName === null || roleName === undefined || roleName.indexOf(' ') === 0 || roleName === "") {
-  //     message.error('角色名不能为空或以空格开头');
-  //     return
-  //   }
-  //
-  //   // 判断角色名是否重名
-  //   let {roles} = this.state
-  //   for (let i = 0; i < roles.length; i++) {
-  //     // console.log(roles[i].name)
-  //     if (roleName === roles[i].name) {
-  //       message.error('该角色已存在');
-  //       return
-  //     }
-  //   }
-  //
-  //   // 请求添加
-  //   const result = await reqAddRole(roleName)
-  //   // 根据结果提示/更新列表显示
-  //   if (result.status === 0) {
-  //     message.success('添加角色成功')
-  //     // 新产生的角色
-  //     const role = result.data
-  //     // 基于原本状态数据更新roles状态
-  //     this.setState(state => ({
-  //       roles: [...state.roles, role]
-  //     }))
-  //   } else {
-  //     message.error('添加角色失败')
-  //   }
-  // }
+  addRole = async () => {
+
+    // 收集输入数据
+    const {roleName, roleDescription} = this.formRef.current.getFieldsValue({roleName: String, roleDescription: String})
+    console.log(this.parentId, roleName, roleDescription)
+
+    // 判断角色名是否为空或以空格开头
+    if (roleName === null || roleName === undefined || roleName.indexOf(' ') === 0 || roleName === "") {
+      message.error('角色名不能为空或以空格开头');
+      return
+    }
+
+    // 判断角色名是否重名
+    let {roles} = this.state
+    for (let i = 0; i < roles.length; i++) {
+      // console.log(roles[i].name)
+      if (roleName === roles[i].name) {
+        message.error('该角色已存在');
+        return
+      }
+    }
+
+    // 判断角色描述是否为空或以空格开头
+    if (roleDescription === null || roleDescription === undefined || roleDescription.indexOf(' ') === 0 || roleDescription === "") {
+      message.error('角色描述不能为空或以空格开头');
+      return
+    }
+
+    // 请求添加
+    const result = await reqAddRole(this.parentId, roleName, roleDescription)
+    // 根据结果提示/更新列表显示
+    if (result.status === 0) {
+      message.success('添加角色成功')
+      // 新产生的角色
+      const role = result.data
+      // 基于原本状态数据更新roles状态
+      this.setState(state => ({
+        roles: [...state.roles, role]
+      }))
+      // 隐藏确认框
+      this.setState({
+        isShowAdd: false
+      })
+      // 重新加载角色列表
+      this.getRoles()
+    } else {
+      message.error('添加角色失败')
+    }
+  }
 
   // 更新角色
   // updateRole = async () => {
@@ -174,6 +186,8 @@ export default class Role extends Component {
   render() {
 
     const {roles, role, isShowAdd, isShowAuth} = this.state
+    // 初始化父级角色ID
+    this.parentId = '0'
 
     console.log(roles)
 
@@ -181,9 +195,12 @@ export default class Role extends Component {
     const title = (
       <div>
         <Button type='primary' onClick={() => this.setState({isShowAdd: true})}>创建角色</Button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <Button type='primary' disabled={!role._id} onClick={() => this.setState({isShowAuth: true})}>设置角色权限</Button>
+        <Button type='primary' disabled={!role.pk_role_id}
+                onClick={() => this.setState({isShowAuth: true})}>设置角色权限</Button>
       </div>
     )
+
+    const {Option} = Select;
 
     return (
       <Card title={title}>
@@ -199,9 +216,25 @@ export default class Role extends Component {
                }}
                onRow={this.onRow} style={{height: 613}}/>
         <Modal title="添加角色" visible={isShowAdd} onOk={this.addRole} onCancel={this.onCancel} destroyOnClose>
-          <Form preserve={false} ref={this.formRef}>
-            <Form.Item name='roleName' label='角色名称'>
-              <Input placeholder='请输入角色名称'/>
+          <Form preserve={false} ref={this.formRef} style={{height: 200}}>
+            <Form.Item label="父级角色ID：" style={{float: "right"}}>
+              <Select defaultValue="0" style={{width: 389}} placeholder="请选择父级角色ID" onSelect={(value) => {
+                this.parentId = value
+                // console.log(this.parentId)
+              }}>
+                <Option value='0'>0</Option>
+                {/* 遍历角色列表 */}
+                {
+                  roles.map(role => <Option value={role.pk_role_id}
+                                            key={role.pk_role_id}>{role.pk_role_id}</Option>)
+                }
+              </Select>
+            </Form.Item>
+            <Form.Item name='roleName' label='角色名称' style={{float: "right"}}>
+              <Input placeholder='请输入角色名称(15字以内)' style={{width: 389, float: "right"}} maxLength={15}/>
+            </Form.Item>
+            <Form.Item name='roleDescription' label='角色描述' style={{float: "right"}}>
+              <TextArea maxLength={100} rows={4} placeholder='请输入角色描述(100字以内)' style={{width: 389, float: "right"}}/>
             </Form.Item>
           </Form>
         </Modal>
