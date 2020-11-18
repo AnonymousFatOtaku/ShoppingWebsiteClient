@@ -76,16 +76,6 @@ export default class User extends Component {
     ]
   }
 
-  // 根据角色数组生成包含所有角色名的对象(属性名用角色id值)
-  initRoleNames = (roles) => {
-    const roleNames = roles.reduce((pre, role) => {
-      pre[role.pk_role_id] = role.name
-      return pre
-    }, {})
-    // 保存
-    this.roleNames = roleNames
-  }
-
   // 显示添加界面
   showAdd = () => {
     this.user = null // 去除前面保存的user
@@ -218,12 +208,11 @@ export default class User extends Component {
   // 获取所有用户
   getUsers = async () => {
     const result = await reqUsers()
+    console.log(result)
     if (result.status === 0) {
-      const {users, roles} = result.data
-      this.initRoleNames(roles)
+      const users = result.data
       this.setState({
         users,
-        roles
       })
     }
   }
@@ -246,9 +235,9 @@ export default class User extends Component {
 
   render() {
 
-    const {users, roles, visible} = this.state
+    const {users, visible} = this.state
     const user = this.user || {}
-    console.log(user)
+    console.log(users, user)
 
     // 顶部左侧按钮
     const title = (
@@ -290,13 +279,13 @@ export default class User extends Component {
             ]}>
               <Input placeholder="请输入邮箱" style={{width: 400, float: "right"}} defaultValue={user.email}/>
             </Form.Item>
-            <Form.Item name="role_id" label="角色：">
+            {/*<Form.Item name="role_id" label="角色：">
               <Select defaultValue={user.role_id} placeholder="请选择角色" style={{width: 400, marginLeft: 2}}>
                 {
                   roles.map(role => <Option key={role._id} value={role._id}>{role.name}</Option>)
                 }
               </Select>
-            </Form.Item>
+            </Form.Item>*/}
           </Form>
         </Modal>
       </Card>
