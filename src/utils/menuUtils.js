@@ -3,10 +3,12 @@ const menuUtils = [
   {
     name: '首页', // 菜单标题
     path: '/home', // 菜单路径
+    rightId: 1,
   },
   {
     name: '商品',
     path: '/products',
+    rightId: 3,
     children: [ // 子菜单列表
       {
         name: '品类管理',
@@ -21,40 +23,17 @@ const menuUtils = [
   {
     name: '用户管理',
     path: '/user',
+    rightId: 8,
   },
   {
     name: '角色管理',
     path: '/role',
-  },
-  {
-    name: '图形图表',
-    path: '/charts',
-    children: [
-      {
-        name: '柱形图',
-        path: '/bar',
-      },
-      {
-        name: '折线图',
-        path: '/line',
-      },
-      {
-        name: '饼图',
-        path: '/pie',
-      },
-    ]
+    rightId: 13,
   },
   {
     name: '订单管理',
     path: '/order',
-  },
-  {
-    name: '商品列表',
-    path: '/userProduct',
-  },
-  {
-    name: '我的订单',
-    path: '/userOrder',
+    rightId: 18,
   },
 ]
 

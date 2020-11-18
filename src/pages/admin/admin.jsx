@@ -11,7 +11,7 @@ import Home from "../home/home";
 // import Line from "../line/line";
 // import Pie from "../pie/pie";
 import Role from "../role/role";
-// import User from "../user/user";
+import User from "../user/user";
 // import Order from "../order/order";
 // import UserOrder from "../user-order/user-order";
 // import UserProduct from "../user-product/user-product";
@@ -82,9 +82,9 @@ export default class Admin extends Component {
               {/*<Route path='/product' component={Product}>*/}
               {/*  {menus.indexOf("/product") === -1 ? <Redirect to="/home"/> : null}*/}
               {/*</Route>*/}
-              {/*<Route path='/user' component={User}>*/}
+              <Route path='/user' component={User}>
               {/*  {menus.indexOf("/user") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
+              </Route>
               <Route path='/role' component={Role}>
               {/*  {menus.indexOf("/role") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>

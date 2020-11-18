@@ -1,11 +1,12 @@
 // 角色管理路由
 import React, {Component} from "react";
 import {Button, Card, Table, Modal, Form, Input, message, Select} from 'antd';
-import {reqRoles, reqAddRole, reqUpdateRole} from '../../api'
+import {reqRoles, reqAddRole, reqUpdateRoleRights, reqUserRole} from '../../api'
 import memoryUtils from "../../utils/memoryUtils"
 import {formateDate} from '../../utils/dateUtils'
 import storageUtils from "../../utils/storageUtils";
 import AuthForm from './auth-form'
+import cookieUtils from "../../utils/cookieUtils";
 
 const {TextArea} = Input;
 
@@ -72,6 +73,7 @@ export default class Role extends Component {
 
   // 点击行时获取选中的角色
   onRow = (role) => {
+    console.log(role)
     return {
       onClick: event => {
         this.setState({
@@ -133,40 +135,44 @@ export default class Role extends Component {
   }
 
   // 更新角色
-  // updateRole = async () => {
-  //   // 隐藏确认框
-  //   this.setState({
-  //     isShowAuth: false
-  //   })
-  //   const role = this.state.role
-  //   // console.log(role.name)
-  //   if (role.name === "超级管理员") {
-  //     message.error('不能修改超级管理员权限');
-  //   } else {
-  //     // 得到最新的menus
-  //     const menus = this.auth.current.getMenus()
-  //     // console.log(menus)
-  //     role.menus = menus
-  //     role.auth_time = Date.now()
-  //     role.auth_name = memoryUtils.user.username
-  //     // 请求更新
-  //     const result = await reqUpdateRole(role)
-  //     if (result.status === 0) {
-  //       // 如果当前更新的是自己角色的权限强制退出
-  //       if (role._id === memoryUtils.user.role_id) {
-  //         memoryUtils.user = {}
-  //         storageUtils.removeUser()
-  //         this.props.history.replace('/login')
-  //         message.success('当前用户角色权限成功')
-  //       } else {
-  //         message.success('设置角色权限成功')
-  //         this.setState({
-  //           roles: [...this.state.roles]
-  //         })
-  //       }
-  //     }
-  //   }
-  // }
+  updateRole = async () => {
+    // 隐藏确认框
+    this.setState({
+      isShowAuth: false
+    })
+    const role = this.state.role
+    // console.log(role.name)
+    if (role.name === "超级管理员") {
+      message.error('不能修改超级管理员权限');
+    } else {
+      // 得到最新的menus
+      let menus = this.auth.current.getMenus()
+      if (menus.indexOf("all") != -1) {
+        menus.splice(menus.indexOf("all"), 1)
+      }
+      console.log(role.pk_role_id, menus)
+      // 请求更新
+      const result = await reqUpdateRoleRights(role.pk_role_id, menus)
+      console.log(result)
+      if (result.status === 0) {
+        let userRole = await reqUserRole(cookieUtils.getUserCookie().pk_user_id)
+        console.log(role.pk_role_id, userRole.data[0].fk_role_id)
+        // 如果当前更新的是自己角色的权限强制退出
+        if (role.pk_role_id === userRole.data[0].fk_role_id) {
+          // 删除保存的user数据和token
+          cookieUtils.removeUserCookie()
+          localStorage.removeItem('token')
+          this.props.history.replace('/AdminLogin')
+          message.success('当前用户角色权限成功')
+        } else {
+          message.success('设置角色权限成功')
+          this.setState({
+            roles: [...this.state.roles]
+          })
+        }
+      }
+    }
+  }
 
   componentWillMount() {
     this.initColumn()
@@ -189,7 +195,7 @@ export default class Role extends Component {
     // 初始化父级角色ID
     this.parentId = '0'
 
-    console.log(roles)
+    // console.log(role)
 
     // 顶部左侧按钮
     const title = (

@@ -108,39 +108,12 @@ class AdminSider extends Component {
                 角色管理
               </Link>
             </Menu.Item> : null}
-          <SubMenu key="/charts" icon={<AreaChartOutlined/>} title="图形图表">
-            <Menu.Item key="/bar" icon={<BarChartOutlined/>}>
-              <Link to='/bar'>
-                柱形图
-              </Link>
-            </Menu.Item>
-            <Menu.Item key="/line" icon={<LineChartOutlined/>}>
-              <Link to='/line'>
-                折线图
-              </Link>
-            </Menu.Item>
-            <Menu.Item key="/pie" icon={<PieChartOutlined/>}>
-              <Link to='/pie'>
-                饼图
-              </Link>
-            </Menu.Item>
-          </SubMenu>
           {menus.indexOf(18) != -1 ?
             <Menu.Item key="/order" icon={<BarsOutlined/>}>
               <Link to='/order'>
                 订单管理
               </Link>
             </Menu.Item> : null}
-          <Menu.Item key="/userProduct" icon={<ShoppingCartOutlined/>}>
-            <Link to='/userProduct'>
-              商品列表
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/userOrder" icon={<BarsOutlined/>}>
-            <Link to='/userOrder'>
-              我的订单
-            </Link>
-          </Menu.Item>
         </Menu>
       </div>
     )
