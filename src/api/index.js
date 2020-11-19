@@ -35,7 +35,7 @@ export const reqUsers = () => ajax('/user/getAllUsers')
 // 删除指定用户
 export const reqDeleteUser = (userId) => ajax('/manage/user/delete', {userId}, 'POST')
 // 添加/更新用户
-export const reqAddOrUpdateUser = (user) => ajax('/manage/user/' + (user._id ? 'update' : 'add'), user, 'POST')
+export const reqAddOrUpdateUser = (user) => ajax('/user/' + (user.pk_user_id ? 'updateUser' : 'addUser'), user, 'POST')
 // 获取一级/二级分类的列表
 export const reqCategorys = (parentId) => ajax('/manage/category/list', {parentId})
 // 添加分类

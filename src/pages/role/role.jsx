@@ -223,7 +223,7 @@ export default class Role extends Component {
                onRow={this.onRow} style={{height: 613}}/>
         <Modal title="添加角色" visible={isShowAdd} onOk={this.addRole} onCancel={this.onCancel} destroyOnClose>
           <Form preserve={false} ref={this.formRef} style={{height: 200}}>
-            <Form.Item label="父级角色ID：" style={{float: "right"}}>
+            <Form.Item label="父角色ID：" style={{float: "right"}}>
               <Select defaultValue="0" style={{width: 389}} placeholder="请选择父级角色ID" onSelect={(value) => {
                 this.parentId = value
                 // console.log(this.parentId)

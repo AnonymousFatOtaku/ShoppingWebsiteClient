@@ -2,7 +2,7 @@
 import React, {Component} from "react";
 import {Button, Card, Space, Table, Modal, Select, Input, Form, message} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
-import {reqDeleteUser, reqUsers, reqAddOrUpdateUser} from "../../api/index";
+import {reqDeleteUser, reqUsers, reqAddOrUpdateUser, reqRoles, reqUserRole} from "../../api/index";
 import memoryUtils from '../../utils/memoryUtils'
 import './user.less'
 
@@ -12,6 +12,7 @@ export default class User extends Component {
     users: [], // 所有用户列表
     roles: [], // 所有角色列表
     visible: false,
+    // roleName: ''
   };
 
   formRef = React.createRef();
@@ -116,9 +117,6 @@ export default class User extends Component {
 
   // 添加/修改用户
   addOrUpdateUser = async () => {
-    this.setState({
-      visible: false
-    })
     // 收集输入数据
     const user = this.formRef.current.getFieldsValue({user: Object})
 
@@ -136,11 +134,18 @@ export default class User extends Component {
       if (user.email === undefined) {
         user.email = this.user.email
       }
-      if (user.role_id === undefined) {
-        user.role_id = this.user.role_id
+      if (user.pk_user_id === undefined) {
+        user.pk_user_id = this.user.pk_user_id
       }
     }
-    // console.log(user, this.user)
+    console.log(user, this.user)
+
+    // 如果是修改则获取当前用户角色id
+    let roleId
+    if (this.user) {
+      let result = await reqUserRole(user.pk_user_id)
+      roleId = result.data[0].fk_role_id
+    }
 
     let uapReg = /^[a-zA-Z0-9_]{3,12}$/
     let phoneReg = /^1[3456789]\d{9}$/
@@ -166,13 +171,13 @@ export default class User extends Component {
       this.setState({
         visible: true
       })
-    } else if (user.role_id === undefined) {
+    } else if (this.user && user.role_id === undefined) {
       message.error('请选择角色');
       this.setState({
         visible: true
       })
-    } else if (this.user && this.user.role_id === "5f74631c0e955025a8439b50" && user.role_id != "5f74631c0e955025a8439b50") {
-      message.error('超级管理员不能修改自身权限');
+    } else if (this.user && roleId === 1 && user.role_id != 1) {
+      message.error('超级管理员不能修改自身角色');
       this.setState({
         visible: true
       })
@@ -193,8 +198,9 @@ export default class User extends Component {
       this.formRef.current.resetFields()
       // 如果是更新需要给user指定_id属性
       if (this.user) {
-        user._id = this.user._id
+        user.pk_user_id = this.user.pk_user_id
       }
+      console.log(user)
       // 提交添加的请求
       const result = await reqAddOrUpdateUser(user)
       // 刷新列表显示
@@ -202,6 +208,9 @@ export default class User extends Component {
         message.success(`${this.user ? '修改' : '添加'}用户成功`)
         this.getUsers()
       }
+      this.setState({
+        visible: false
+      })
     }
   }
 
@@ -212,10 +221,32 @@ export default class User extends Component {
     if (result.status === 0) {
       const users = result.data
       this.setState({
-        users,
+        users
       })
     }
   }
+
+  // 获取所有角色
+  getRoles = async () => {
+    const result = await reqRoles()
+    console.log(result)
+    if (result.status === 0) {
+      const roles = result.data
+      this.setState({
+        roles
+      })
+    }
+  }
+
+  // 获取用户的角色
+  // getUserRole = async (pk_user_id) => {
+  //   const result = await reqUserRole(pk_user_id)
+  //   console.log(result)
+  //   const roleName = result.data[0].fk_role_id
+  //   this.setState({
+  //     roleName: roleName
+  //   });
+  // }
 
   componentWillMount() {
     this.initColumns()
@@ -223,6 +254,7 @@ export default class User extends Component {
 
   componentDidMount() {
     this.getUsers()
+    this.getRoles()
   }
 
   handleCancel = () => {
@@ -235,9 +267,13 @@ export default class User extends Component {
 
   render() {
 
-    const {users, visible} = this.state
+    const {users, roles, visible} = this.state
     const user = this.user || {}
     console.log(users, user)
+    console.log(roles)
+    // this.getUserRole(user.pk_user_id)
+    // let {roleName} = this.state
+    // console.log(roleName)
 
     // 顶部左侧按钮
     const title = (
@@ -252,7 +288,7 @@ export default class User extends Component {
       <Card title={title}>
         <Table columns={this.columns} dataSource={users} bordered style={{height: 613}}
                pagination={{defaultPageSize: 8}}/>
-        <Modal title={user._id ? '修改用户' : '添加用户'} visible={visible} onOk={this.addOrUpdateUser}
+        <Modal title={user.pk_user_id ? '修改用户' : '添加用户'} visible={visible} onOk={this.addOrUpdateUser}
                onCancel={this.handleCancel} destroyOnClose>
           <Form preserve={false} ref={this.formRef}>
             <Form.Item name="username" label="用户名：" rules={[
@@ -279,13 +315,14 @@ export default class User extends Component {
             ]}>
               <Input placeholder="请输入邮箱" style={{width: 400, float: "right"}} defaultValue={user.email}/>
             </Form.Item>
-            {/*<Form.Item name="role_id" label="角色：">
-              <Select defaultValue={user.role_id} placeholder="请选择角色" style={{width: 400, marginLeft: 2}}>
-                {
-                  roles.map(role => <Option key={role._id} value={role._id}>{role.name}</Option>)
-                }
-              </Select>
-            </Form.Item>*/}
+            {this.user != null ?
+              <Form.Item name="role_id" label="角色：">
+                <Select placeholder="请选择角色" style={{width: 400, marginLeft: 2}}>
+                  {
+                    roles.map(role => <Option key={role.pk_role_id} value={role.pk_role_id}>{role.name}</Option>)
+                  }
+                </Select>
+              </Form.Item> : null}
           </Form>
         </Modal>
       </Card>
