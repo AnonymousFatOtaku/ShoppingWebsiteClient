@@ -4,6 +4,7 @@ import {Button, Card, Space, Table, Modal, Select, Input, Form, message} from 'a
 import {formateDate} from "../../utils/dateUtils"
 import {reqDeleteUser, reqUsers, reqAddOrUpdateUser, reqRoles, reqUserRole} from "../../api/index";
 import memoryUtils from '../../utils/memoryUtils'
+import cookieUtils from "../../utils/cookieUtils";
 import './user.less'
 
 export default class User extends Component {
@@ -95,16 +96,17 @@ export default class User extends Component {
 
   // 删除指定用户
   deleteUser = (user) => {
-    if (memoryUtils.user.username === user.username) {
+    console.log(cookieUtils.getUserCookie(), user)
+    if (cookieUtils.getUserCookie().pk_user_id === user.pk_user_id) {
       message.warning('不能删除当前登录的用户');
     } else {
-      if (user.role_id === "5f74631c0e955025a8439b50") {
-        message.warning('不能删除超级管理员');
+      if (user.type === 1) {
+        message.warning('不能删除管理员');
       } else {
         Modal.confirm({
           title: `确认删除${user.username}吗?`,
           onOk: async () => {
-            const result = await reqDeleteUser(user._id)
+            const result = await reqDeleteUser(user.pk_user_id)
             if (result.status === 0) {
               message.success('删除用户成功')
               this.getUsers()

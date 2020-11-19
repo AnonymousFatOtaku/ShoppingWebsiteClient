@@ -33,7 +33,7 @@ export const reqUserRole = (pk_user_id) => ajax('/role/getRoleByUserId', {pk_use
 // 获取所有用户的列表
 export const reqUsers = () => ajax('/user/getAllUsers')
 // 删除指定用户
-export const reqDeleteUser = (userId) => ajax('/manage/user/delete', {userId}, 'POST')
+export const reqDeleteUser = (pk_user_id) => ajax('/user/deleteUser', {pk_user_id}, 'POST')
 // 添加/更新用户
 export const reqAddOrUpdateUser = (user) => ajax('/user/' + (user.pk_user_id ? 'updateUser' : 'addUser'), user, 'POST')
 // 获取一级/二级分类的列表
