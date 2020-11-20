@@ -37,13 +37,18 @@ export const reqDeleteUser = (pk_user_id) => ajax('/user/deleteUser', {pk_user_i
 // 添加/更新用户
 export const reqAddOrUpdateUser = (user) => ajax('/user/' + (user.pk_user_id ? 'updateUser' : 'addUser'), user, 'POST')
 // 获取一级/二级分类的列表
-export const reqCategorys = (parentId) => ajax('/manage/category/list', {parentId})
+export const reqCategorys = (parent_category_id) => ajax('/category/getCategoriesByParentId', {parent_category_id})
 // 添加分类
-export const reqAddCategory = (categoryName, parentId) => ajax('/manage/category/add', {categoryName, parentId}, 'POST')
+export const reqAddCategory = (parent_category_id, name, description) => ajax('/category/addCategory', {
+  parent_category_id,
+  name,
+  description
+}, 'POST')
 // 更新分类
-export const reqUpdateCategory = ({categoryId, categoryName}) => ajax('/manage/category/update', {
-  categoryId,
-  categoryName
+export const reqUpdateCategory = ({categoryName, categoryDescription, categoryId}) => ajax('/category/updateCategory', {
+  categoryName,
+  categoryDescription,
+  categoryId
 }, 'POST')
 // 添加/修改商品
 export const reqAddOrUpdateProduct = (product) => ajax('/manage/product/' + (product._id ? 'update' : 'add'), product, 'POST')

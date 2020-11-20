@@ -5,7 +5,7 @@ import {Layout} from 'antd';
 import AdminSider from "../../components/admin-sider/admin-sider";
 import AdminHeader from "../../components/admin-header/admin-header";
 import Home from "../home/home";
-// import Category from "../category/category";
+import Category from "../category/category";
 // import Product from "../product/index";
 // import Bar from "../bar/bar";
 // import Line from "../line/line";
@@ -76,17 +76,17 @@ export default class Admin extends Component {
             <Switch>
               <Redirect from='/' exact to='/home'/>
               <Route path='/home' component={Home}/>
-              {/*<Route path='/category' component={Category}>*/}
-              {/*  {menus.indexOf("/category") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
+              <Route path='/category' component={Category}>
+                {/*  {menus.indexOf("/category") === -1 ? <Redirect to="/home"/> : null}*/}
+              </Route>
               {/*<Route path='/product' component={Product}>*/}
               {/*  {menus.indexOf("/product") === -1 ? <Redirect to="/home"/> : null}*/}
               {/*</Route>*/}
               <Route path='/user' component={User}>
-              {/*  {menus.indexOf("/user") === -1 ? <Redirect to="/home"/> : null}*/}
+                {/*  {menus.indexOf("/user") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
               <Route path='/role' component={Role}>
-              {/*  {menus.indexOf("/role") === -1 ? <Redirect to="/home"/> : null}*/}
+                {/*  {menus.indexOf("/role") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
               {/*<Route path="/bar" component={Bar}>*/}
               {/*  {menus.indexOf("/bar") === -1 ? <Redirect to="/home"/> : null}*/}
