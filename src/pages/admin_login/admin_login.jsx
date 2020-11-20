@@ -6,8 +6,6 @@ import {UserOutlined, LockOutlined} from '@ant-design/icons';
 import logo from '../../assets/images/logo.gif'
 import './admin_login.less'
 import {reqAdminLogin} from '../../api/index'
-import memoryUtils from "../../utils/memoryUtils";
-import storageUtils from "../../utils/storageUtils";
 import cookieUtils from "../../utils/cookieUtils";
 
 export default class Login extends Component {

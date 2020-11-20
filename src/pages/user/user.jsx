@@ -2,8 +2,7 @@
 import React, {Component} from "react";
 import {Button, Card, Space, Table, Modal, Select, Input, Form, message} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
-import {reqDeleteUser, reqUsers, reqAddOrUpdateUser, reqRoles, reqUserRole} from "../../api/index";
-import memoryUtils from '../../utils/memoryUtils'
+import {reqDeleteUser, reqUsers, reqAddOrUpdateUser, reqRoles, reqUserRole, reqUserRoles} from "../../api/index";
 import cookieUtils from "../../utils/cookieUtils";
 import './user.less'
 
@@ -13,7 +12,7 @@ export default class User extends Component {
     users: [], // 所有用户列表
     roles: [], // 所有角色列表
     visible: false,
-    // roleName: ''
+    userRoles: [],
   };
 
   formRef = React.createRef();
@@ -147,7 +146,11 @@ export default class User extends Component {
     if (this.user) {
       let result = await reqUserRole(user.pk_user_id)
       roleId = result.data[0].fk_role_id
+      if (user.role_id === undefined) {
+        user.role_id = roleId
+      }
     }
+    console.log(roleId)
 
     let uapReg = /^[a-zA-Z0-9_]{3,12}$/
     let phoneReg = /^1[3456789]\d{9}$/
@@ -241,14 +244,13 @@ export default class User extends Component {
   }
 
   // 获取用户的角色
-  // getUserRole = async (pk_user_id) => {
-  //   const result = await reqUserRole(pk_user_id)
-  //   console.log(result)
-  //   const roleName = result.data[0].fk_role_id
-  //   this.setState({
-  //     roleName: roleName
-  //   });
-  // }
+  getUserRoles = async () => {
+    const userRoles = await reqUserRoles()
+    console.log(userRoles)
+    this.setState({
+      userRoles: userRoles.data
+    });
+  }
 
   componentWillMount() {
     this.initColumns()
@@ -257,6 +259,7 @@ export default class User extends Component {
   componentDidMount() {
     this.getUsers()
     this.getRoles()
+    this.getUserRoles()
   }
 
   handleCancel = () => {
@@ -269,13 +272,20 @@ export default class User extends Component {
 
   render() {
 
-    const {users, roles, visible} = this.state
-    const user = this.user || {}
+    let {users, roles, visible, userRoles} = this.state
+    let user = this.user || {}
     console.log(users, user)
     console.log(roles)
-    // this.getUserRole(user.pk_user_id)
-    // let {roleName} = this.state
-    // console.log(roleName)
+    console.log(userRoles)
+
+    let roleId
+    if (user != {}) {
+      for (let i = 0; i < userRoles.length; i++) {
+        if (user.pk_user_id === userRoles[i].fk_user_id) {
+          roleId = userRoles[i].fk_role_id - 1
+        }
+      }
+    }
 
     // 顶部左侧按钮
     const title = (
@@ -319,7 +329,7 @@ export default class User extends Component {
             </Form.Item>
             {this.user != null ?
               <Form.Item name="role_id" label="角色：">
-                <Select placeholder="请选择角色" style={{width: 400, marginLeft: 2}}>
+                <Select placeholder="请选择角色" style={{width: 400, marginLeft: 2}} defaultValue={roles[roleId].name}>
                   {
                     roles.map(role => <Option key={role.pk_role_id} value={role.pk_role_id}>{role.name}</Option>)
                   }

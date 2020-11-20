@@ -32,6 +32,8 @@ export const reqUpdateRoleRights = (pk_role_id, menus) => ajax('/role/updateRole
 export const reqUserRole = (pk_user_id) => ajax('/role/getRoleByUserId', {pk_user_id})
 // 获取所有用户的列表
 export const reqUsers = () => ajax('/user/getAllUsers')
+// 获取用户角色关联信息
+export const reqUserRoles = () => ajax('/role/getUserRoles')
 // 删除指定用户
 export const reqDeleteUser = (pk_user_id) => ajax('/user/deleteUser', {pk_user_id}, 'POST')
 // 添加/更新用户
