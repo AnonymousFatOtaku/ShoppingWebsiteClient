@@ -88,7 +88,7 @@ export default class Product extends Component {
     const {searchName, searchType} = this.state
     let result
     if (searchName) { // 如果搜索关键字有值说明要做搜索分页
-      result = await reqSearchProducts({pageNum, pageSize: 5, searchName, searchType})
+      result = await reqSearchProducts({searchName, searchType})
     } else { // 一般分页请求
       result = await reqProducts()
     }
@@ -137,7 +137,7 @@ export default class Product extends Component {
         <Select style={{width: 200, marginRight: 20}} value={searchType}
                 onChange={value => this.setState({searchType: value})}>
           <Option value='productName'>按名称搜索</Option>
-          <Option value='productDesc'>按描述搜索</Option>
+          <Option value='categoryId'>按分类id搜索</Option>
         </Select>
         <Input placeholder='关键字' style={{width: 200, marginRight: 20}} value={searchName}
                onChange={event => this.setState({searchName: event.target.value})}/>
