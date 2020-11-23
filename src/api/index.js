@@ -38,6 +38,8 @@ export const reqUserRoles = () => ajax('/role/getUserRoles')
 export const reqDeleteUser = (pk_user_id) => ajax('/user/deleteUser', {pk_user_id}, 'POST')
 // 添加/更新用户
 export const reqAddOrUpdateUser = (user) => ajax('/user/' + (user.pk_user_id ? 'updateUser' : 'addUser'), user, 'POST')
+// 修改用户权限
+export const reqUpdateUserRole = (user) => ajax('/user/updateUserRole', user, 'POST')
 // 获取一级/二级分类的列表
 export const reqCategorys = (parent_category_id) => ajax('/category/getCategoriesByParentId', {parent_category_id})
 // 添加分类

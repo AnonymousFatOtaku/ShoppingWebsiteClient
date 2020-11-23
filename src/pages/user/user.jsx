@@ -2,7 +2,15 @@
 import React, {Component} from "react";
 import {Button, Card, Space, Table, Modal, Select, Input, Form, message} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
-import {reqDeleteUser, reqUsers, reqAddOrUpdateUser, reqRoles, reqUserRole, reqUserRoles} from "../../api/index";
+import {
+  reqDeleteUser,
+  reqUsers,
+  reqAddOrUpdateUser,
+  reqRoles,
+  reqUserRole,
+  reqUserRoles,
+  reqUpdateUserRole
+} from "../../api/index";
 import cookieUtils from "../../utils/cookieUtils";
 import './user.less'
 
@@ -12,6 +20,7 @@ export default class User extends Component {
     users: [], // 所有用户列表
     roles: [], // 所有角色列表
     visible: false,
+    visibleRole: false,
     userRoles: [],
   };
 
@@ -69,7 +78,8 @@ export default class User extends Component {
         title: '操作',
         render: (user) => (
           <span>
-            <a onClick={() => this.showUpdate(user)}>修改&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={() => this.showUpdate(user)}>修改资料&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={() => this.showRoleUpdate(user)}>修改权限&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.deleteUser(user)}>删除</a>
           </span>
         )
@@ -91,6 +101,62 @@ export default class User extends Component {
     this.setState({
       visible: true
     })
+  }
+
+  // 显示权限修改界面
+  showRoleUpdate = (user) => {
+    this.user = user // 保存user
+    this.setState({
+      visibleRole: true
+    })
+  }
+
+  // 权限修改
+  roleUpdate = async () => {
+    // 收集输入数据
+    const user = this.formRef.current.getFieldsValue({user: Object})
+
+    // 给user指定id
+    if (user.pk_user_id === undefined) {
+      user.pk_user_id = this.user.pk_user_id
+    }
+    console.log(user, this.user)
+
+    // 如果是修改则获取当前用户角色id
+    let roleId
+    if (this.user) {
+      let result = await reqUserRole(user.pk_user_id)
+      roleId = result.data[0].fk_role_id
+      if (user.role_id === undefined) {
+        user.role_id = roleId
+      }
+    }
+    console.log(user)
+
+    if (this.user && user.role_id === undefined) {
+      message.error('请选择角色');
+      this.setState({
+        visible: true
+      })
+    } else if (this.user && roleId === 1 && user.role_id != 1) {
+      message.error('超级管理员不能修改自身角色');
+      this.setState({
+        visible: true
+      })
+    } else { // 所有验证都通过才执行添加/修改操作
+      // 重置所有输入内容
+      this.formRef.current.resetFields()
+      // 提交添加的请求
+      const result = await reqUpdateUserRole(user)
+      // 刷新列表显示
+      if (result.status === 0) {
+        message.success('修改用户权限成功')
+        this.getUsers()
+      }
+      this.setState({
+        visibleRole: false
+      })
+    }
   }
 
   // 删除指定用户
@@ -141,17 +207,6 @@ export default class User extends Component {
     }
     console.log(user, this.user)
 
-    // 如果是修改则获取当前用户角色id
-    let roleId
-    if (this.user) {
-      let result = await reqUserRole(user.pk_user_id)
-      roleId = result.data[0].fk_role_id
-      if (user.role_id === undefined) {
-        user.role_id = roleId
-      }
-    }
-    console.log(roleId)
-
     let uapReg = /^[a-zA-Z0-9_]{3,12}$/
     let phoneReg = /^1[3456789]\d{9}$/
     let emailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
@@ -176,16 +231,6 @@ export default class User extends Component {
       this.setState({
         visible: true
       })
-    } else if (this.user && user.role_id === undefined) {
-      message.error('请选择角色');
-      this.setState({
-        visible: true
-      })
-    } else if (this.user && roleId === 1 && user.role_id != 1) {
-      message.error('超级管理员不能修改自身角色');
-      this.setState({
-        visible: true
-      })
     } else { // 所有验证都通过才执行添加/修改操作
       const {users} = this.state
       // console.log(users, typeof users, users.length, users[0])
@@ -201,17 +246,14 @@ export default class User extends Component {
       }
       // 重置所有输入内容
       this.formRef.current.resetFields()
-      // 如果是更新需要给user指定_id属性
-      if (this.user) {
-        user.pk_user_id = this.user.pk_user_id
-      }
-      console.log(user)
       // 提交添加的请求
       const result = await reqAddOrUpdateUser(user)
       // 刷新列表显示
       if (result.status === 0) {
         message.success(`${this.user ? '修改' : '添加'}用户成功`)
         this.getUsers()
+      } else if (result.status === 1) {
+        message.error('用户信息已存在');
       }
       this.setState({
         visible: false
@@ -267,12 +309,13 @@ export default class User extends Component {
     this.formRef.current.resetFields()
     this.setState({
       visible: false,
+      visibleRole: false,
     });
   };
 
   render() {
 
-    let {users, roles, visible, userRoles} = this.state
+    let {users, roles, visible, visibleRole, userRoles} = this.state
     let user = this.user || {}
     console.log(users, user)
     console.log(roles)
@@ -327,6 +370,10 @@ export default class User extends Component {
             ]}>
               <Input placeholder="请输入邮箱" style={{width: 400, float: "right"}} defaultValue={user.email}/>
             </Form.Item>
+          </Form>
+        </Modal>
+        <Modal title='修改权限' visible={visibleRole} onOk={this.roleUpdate} onCancel={this.handleCancel} destroyOnClose>
+          <Form preserve={false} ref={this.formRef}>
             {this.user != null ?
               <Form.Item name="role_id" label="角色：">
                 <Select placeholder="请选择角色" style={{width: 400, marginLeft: 2}} defaultValue={roles[roleId].name}>
