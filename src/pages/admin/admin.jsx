@@ -6,17 +6,14 @@ import AdminSider from "../../components/admin-sider/admin-sider";
 import AdminHeader from "../../components/admin-header/admin-header";
 import Home from "../home/home";
 import Category from "../category/category";
-// import Product from "../product/index";
-// import Bar from "../bar/bar";
-// import Line from "../line/line";
-// import Pie from "../pie/pie";
+import Product from "../product/index";
 import Role from "../role/role";
 import User from "../user/user";
 // import Order from "../order/order";
 // import UserOrder from "../user-order/user-order";
 // import UserProduct from "../user-product/user-product";
 import memoryUtils from "../../utils/memoryUtils";
-// import ProductInfo from '../product/product-info'
+import ProductInfo from '../product/product-info'
 // import NotFound from '../not-found/not-found'
 import './admin.less';
 import {reqRoles} from "../../api";
@@ -79,9 +76,9 @@ export default class Admin extends Component {
               <Route path='/category' component={Category}>
                 {/*  {menus.indexOf("/category") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
-              {/*<Route path='/product' component={Product}>*/}
-              {/*  {menus.indexOf("/product") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
+              <Route path='/product' component={Product}>
+                {/*  {menus.indexOf("/product") === -1 ? <Redirect to="/home"/> : null}*/}
+              </Route>
               <Route path='/user' component={User}>
                 {/*  {menus.indexOf("/user") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
@@ -106,7 +103,7 @@ export default class Admin extends Component {
               {/*<Route path="/userOrder" component={UserOrder}>*/}
               {/*  {menus.indexOf("/userOrder") === -1 ? <Redirect to="/home"/> : null}*/}
               {/*</Route>*/}
-              {/*<Route path="/ProductInfo" component={ProductInfo}> </Route>*/}
+              <Route path="/ProductInfo" component={ProductInfo}> </Route>
               {/*<Route component={NotFound}/>*/}
             </Switch>
           </Content>

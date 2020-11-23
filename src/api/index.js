@@ -57,7 +57,7 @@ export const reqUpdateCategory = ({categoryName, categoryDescription, categoryId
 // 添加/修改商品
 export const reqAddOrUpdateProduct = (product) => ajax('/manage/product/' + (product._id ? 'update' : 'add'), product, 'POST')
 // 获取商品分页列表
-export const reqProducts = (pageNum, pageSize) => ajax('/manage/product/list', {pageNum, pageSize})
+export const reqProducts = () => ajax('/product/getAllProducts')
 // 更新商品的状态(上架/下架)
 export const reqUpdateStatus = (productId, status) => ajax('/manage/product/updateStatus', {productId, status}, 'POST')
 // 根据商品名称/商品描述搜索商品分页列表，搜索的类型：productName/productDesc
