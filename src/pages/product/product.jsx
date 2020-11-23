@@ -37,6 +37,7 @@ export default class Product extends Component {
       {
         title: '商品售价',
         dataIndex: 'price',
+        render: (price) => '¥' + price  // 当前指定了对应的属性，传入的是对应的属性值
       },
       {
         title: '创建时间',
@@ -49,23 +50,18 @@ export default class Product extends Component {
         render: formateDate,
       },
       {
-        title: '价格',
-        dataIndex: 'price',
-        render: (price) => '¥' + price  // 当前指定了对应的属性，传入的是对应的属性值
-      },
-      {
         width: 120,
         title: '状态',
         render: (product) => {
-          const {status, _id} = product
-          const newStatus = status === true ? false : true
+          const {saleable, pk_product_id} = product
+          const newStatus = saleable === 0 ? 1 : 0
           return (
             <div style={{textAlign: "center"}}>
-              <Button type='primary' onClick={() => this.updateStatus(_id, newStatus)}>
-                {status === true ? '下架' : '上架'}
+              <Button type='primary' onClick={() => this.updateStatus(pk_product_id, newStatus)}>
+                {saleable === 1 ? '下架' : '上架'}
               </Button>
               <br/>
-              <span>{status === true ? '在售' : '已下架'}</span>
+              <span>{saleable === 1 ? '在售' : '已下架'}</span>
             </div>
           )
         }
