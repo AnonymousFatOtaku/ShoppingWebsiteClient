@@ -22,9 +22,10 @@ export default class ProductAddUpdate extends Component {
 
   // 初始化商品分类菜单
   initOptions = async (categorys) => {
+    console.log(categorys)
     // 根据分类生成options数组
     const options = categorys.map(c => ({
-      value: c._id,
+      value: c.pk_category_id,
       label: c.name,
       isLeaf: false, // 通过isLeaf判断是否有子集
     }))
@@ -36,7 +37,7 @@ export default class ProductAddUpdate extends Component {
       const subCategorys = await this.getCategorys(pCategoryId)
       // 生成二级下拉列表的options
       const childOptions = subCategorys.map(c => ({
-        value: c._id,
+        value: c.pk_category_id,
         label: c.name,
         isLeaf: true
       }))
@@ -78,7 +79,7 @@ export default class ProductAddUpdate extends Component {
     if (subCategorys && subCategorys.length > 0) {
       // 生成一个二级列表的options
       const childOptions = subCategorys.map(c => ({
-        value: c._id,
+        value: c.pk_category_id,
         label: c.name,
         isLeaf: true
       }))
@@ -143,55 +144,46 @@ export default class ProductAddUpdate extends Component {
     const onFinish = async values => {
       // console.log('Success:', values);
       // 收集输入的数据
-      let {name, desc, price, categoryIds} = values
+      let {name, price, categoryIds} = values
       // console.log(values)
       if (this.product.status) { // 判定是否是修改，如果是修改则要给未改动的参数赋原值
         // console.log(this.product)
         if (name === undefined) {
           name = this.product.name
         }
-        if (desc === undefined) {
-          desc = this.product.desc
-        }
         if (price === undefined) {
           price = this.product.price
         }
+        if (categoryIds === undefined) {
+          categoryIds = this.product.categoryIds
+        }
       }
-      // console.log(name, desc, price, categoryIds)
+      console.log(name, price, categoryIds)
       const imgs = this.pw.current.getImgs()
       const detail = this.editor.current.getDetail()
-      // console.log(imgs, detail)
+      console.log(imgs, detail)
 
       let nameReg = /^[\u4e00-\u9fa5_a-zA-Z0-9_]{3,12}$/
-      let descReg = /^[\u4e00-\u9fa5_a-zA-Z0-9_]{3,50}$/
       let priceReg = /^[0-9]{1,12}$/
       // 对所有输入内容依次进行验证，验证不通过弹出提示且不执行任何操作
       if (!nameReg.test(name) || name === undefined) {
         message.error('商品名称只能由3-12个汉字、英文、数字或下划线组成');
-      } else if (!descReg.test(desc) || desc === undefined) {
-        message.error('商品描述只能由3-50个汉字、英文、数字或下划线组成');
       } else if (!priceReg.test(price) || price === undefined) {
         message.error('商品价格只能由1-12个数字组成');
       } else if (categoryIds === undefined) {
         message.error('请选择商品分类');
       } else {
         // 获取商品分类
-        let pCategoryId, categoryId
-        if (categoryIds.length === 1) { // 一级分类
-          pCategoryId = '0'
-          categoryId = categoryIds[0]
-        } else { // 二级分类
-          pCategoryId = categoryIds[0]
-          categoryId = categoryIds[1]
-        }
+        let categoryId = categoryIds[categoryIds.length - 1]
+        console.log(categoryId)
 
         // 将收集到的数据封装成product对象
-        const product = {name, desc, price, pCategoryId, categoryId, imgs, detail}
-        // console.log(name, desc, price, pCategoryId, categoryId, imgs, detail);
-        // 如果是更新则需要添加_id
+        const product = {name, price, categoryId, imgs, detail}
+        // 如果是更新则需要添加id
         if (this.isUpdate) {
-          product._id = this.product._id
+          product.pk_product_id = this.product.pk_product_id
         }
+        console.log(product);
         // 调用接口请求函数去添加/更新
         const result = await reqAddOrUpdateProduct(product)
         // 根据结果提示
@@ -213,11 +205,6 @@ export default class ProductAddUpdate extends Component {
             {pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9_]{3,12}$/, message: '商品名称只能由3-12个汉字、英文、数字或下划线组成'},
           ]}>
             <Input placeholder="请输入商品名称" style={{width: 400}} defaultValue={product.name}/>
-          </Form.Item>
-          <Form.Item name="desc" label="商品描述：" rules={[
-            {pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9_]{3,50}$/, message: '商品描述只能由3-50个汉字、英文、数字或下划线组成'},
-          ]}>
-            <Input placeholder="请输入商品描述" style={{width: 400}} defaultValue={product.desc}/>
           </Form.Item>
           <Form.Item name="price" label="商品价格：" rules={[
             {pattern: /^[0-9]{1,12}$/, message: '商品价格只能由1-12个数字组成'},

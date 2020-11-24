@@ -55,7 +55,7 @@ export const reqUpdateCategory = ({categoryName, categoryDescription, categoryId
   categoryId
 }, 'POST')
 // 添加/修改商品
-export const reqAddOrUpdateProduct = (product) => ajax('/manage/product/' + (product._id ? 'update' : 'add'), product, 'POST')
+export const reqAddOrUpdateProduct = (product) => ajax('/product/' + (product.pk_product_id ? 'updateProduct' : 'addProduct'), product, 'POST')
 // 获取商品分页列表
 export const reqProducts = () => ajax('/product/getAllProducts')
 // 更新商品的状态(上架/下架)
