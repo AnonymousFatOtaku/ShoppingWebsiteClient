@@ -31,10 +31,6 @@ export default class Product extends Component {
         dataIndex: 'name',
       },
       {
-        title: '商品描述',
-        dataIndex: 'description',
-      },
-      {
         title: '商品售价',
         dataIndex: 'price',
         render: (price) => '¥' + price  // 当前指定了对应的属性，传入的是对应的属性值

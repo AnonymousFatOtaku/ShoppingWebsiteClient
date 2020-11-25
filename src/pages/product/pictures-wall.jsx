@@ -39,13 +39,15 @@ export default class PicturesWall extends React.Component {
   constructor(props) {
     super(props)
     let fileList = []
-    const {imgs} = this.props
+    let {imgs} = this.props
+    imgs = imgs.split(",");
+    console.log(imgs)
     if (imgs && imgs.length > 0) { // 如果传入了imgs属性
       fileList = imgs.map((img, index) => ({
         uid: -index, // 每个file都有自己唯一的id
         name: img, // 图片文件名
         status: 'done', // 图片状态：done-已上传，uploading：正在上传中，removed：已删除
-        url: 'http://localhost:5000/upload/' + img
+        url: 'http://localhost:8000/images/' + img,
       }))
     }
 
@@ -79,15 +81,16 @@ export default class PicturesWall extends React.Component {
     // 一旦上传成功修正当前上传的file的信息(name,url)
     if (file.status === 'done') { // 上传图片
       const result = file.response
-      // if (result.status === 0) {
-      // message.success('上传图片成功')
-      const {name, url} = result.data
-      file = fileList[fileList.length - 1]
-      file.name = name
-      file.url = url
-      // } else {
-      //   message.error('上传图片失败')
-      // }
+      console.log(result)
+      if (result.status === 0) {
+        message.success('上传图片成功')
+        const {name, url} = result.data
+        file = fileList[fileList.length - 1]
+        file.name = name
+        file.url = url
+      } else {
+        message.error('上传图片失败')
+      }
     } else if (file.status === 'removed') { // 删除图片
       // fileList.splice(fileList.indexOf(file), 1)
       // const result = await reqDeleteImg(file.name)
@@ -112,7 +115,7 @@ export default class PicturesWall extends React.Component {
     return (
       <div>
         <Upload
-          action="/manage/img/upload" /* 上传图片的接口地址 */
+          action="/upload/uploadImage" /* 上传图片的接口地址 */
           accept='image/*'  /* 只接收图片格式 */
           name='image' /* 请求参数名 */
           listType="picture-card"  /* 卡片样式 */
@@ -120,6 +123,7 @@ export default class PicturesWall extends React.Component {
           beforeUpload={beforeUpload}
           onPreview={this.handlePreview}
           onChange={this.handleChange}
+          headers={{'Token': localStorage.getItem('token')}}
         >
           {fileList.length >= 3 ? null : uploadButton}
         </Upload>
