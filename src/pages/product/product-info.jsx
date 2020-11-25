@@ -36,7 +36,11 @@ export default class ProductInfo extends Component {
     // 读取携带过来的state数据
     let {name, price, description, image} = this.props.location.state.product
     const {cName1, cName2} = this.state
-    image = image.split(",");
+    console.log(image)
+    if (image) {
+      image = image.split(",");
+      console.log(image)
+    }
     console.log(this.props.location.state.product)
     console.log(cName1, cName2, image)
 
@@ -66,10 +70,10 @@ export default class ProductInfo extends Component {
             商品图片:&nbsp;&nbsp;
             <span>
               {
-                image.map(img => (
+                image ? image.map(img => (
                   <img key={img} src={'http://localhost:8000/images/' + img} className="product-img" alt="img"
                        style={{height: 200, width: 200, marginRight: 20}}/>
-                ))
+                )) : null
               }
             </span>
           </List.Item>

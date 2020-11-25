@@ -40,15 +40,17 @@ export default class PicturesWall extends React.Component {
     super(props)
     let fileList = []
     let {imgs} = this.props
-    imgs = imgs.split(",");
-    console.log(imgs)
-    if (imgs && imgs.length > 0) { // 如果传入了imgs属性
-      fileList = imgs.map((img, index) => ({
-        uid: -index, // 每个file都有自己唯一的id
-        name: img, // 图片文件名
-        status: 'done', // 图片状态：done-已上传，uploading：正在上传中，removed：已删除
-        url: 'http://localhost:8000/images/' + img,
-      }))
+    if (imgs) { // 如果传入了imgs属性
+      imgs = imgs.split(",");
+      console.log(imgs)
+      if(imgs.length > 0){
+        fileList = imgs.map((img, index) => ({
+          uid: -index, // 每个file都有自己唯一的id
+          name: img, // 图片文件名
+          status: 'done', // 图片状态：done-已上传，uploading：正在上传中，removed：已删除
+          url: 'http://localhost:8000/images/' + img,
+        }))
+      }
     }
 
     // 初始化状态
