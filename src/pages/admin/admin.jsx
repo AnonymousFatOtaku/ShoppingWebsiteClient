@@ -9,6 +9,7 @@ import Category from "../category/category";
 import Product from "../product/index";
 import Role from "../role/role";
 import User from "../user/user";
+import Promotion from "../promotion/promotion";
 // import Order from "../order/order";
 // import UserOrder from "../user-order/user-order";
 // import UserProduct from "../user-product/user-product";
@@ -85,6 +86,7 @@ export default class Admin extends Component {
               <Route path='/role' component={Role}>
                 {/*  {menus.indexOf("/role") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
+              <Route path='/promotion' component={Promotion}></Route>
               {/*<Route path="/bar" component={Bar}>*/}
               {/*  {menus.indexOf("/bar") === -1 ? <Redirect to="/home"/> : null}*/}
               {/*</Route>*/}

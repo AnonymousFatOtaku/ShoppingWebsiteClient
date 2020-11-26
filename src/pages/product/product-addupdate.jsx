@@ -11,28 +11,7 @@ export default class ProductAddUpdate extends Component {
 
   state = {
     options: [],
-    create: true,
-    initialValues: {},
   };
-
-  formRef = React.createRef();
-
-  async UNSAFE_componentWillMount() {
-    const {id} = this.props.match.params;
-
-    // 获取数据详情
-    if (id) {
-      this.setState({create: false});
-      store
-        .dispatch({
-          type: "product/retrieve",
-          payload: {id},
-        })
-        .then((initialValues) => {
-          this.formRef.current.setFieldsValue(initialValues);
-        });
-    }
-  }
 
   constructor(props) {
     super(props)

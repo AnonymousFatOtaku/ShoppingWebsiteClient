@@ -114,6 +114,11 @@ class AdminSider extends Component {
                 订单管理
               </Link>
             </Menu.Item> : null}
+          <Menu.Item key="/promotion" icon={<BarsOutlined/>}>
+            <Link to='/promotion'>
+              活动管理
+            </Link>
+          </Menu.Item>
         </Menu>
       </div>
     )

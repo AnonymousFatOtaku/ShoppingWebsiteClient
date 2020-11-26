@@ -64,6 +64,8 @@ export const reqUpdateStatus = (productId, status) => ajax('/product/updateStatu
 export const reqSearchProducts = ({searchName, searchType}) => ajax('/product/searchProducts', {searchName, searchType})
 // 获取一个分类
 export const reqCategory = (categoryId) => ajax('/category/getCategoryById', {categoryId})
+// 获取所有活动的列表
+export const reqPromotions = () => ajax('/promotion/getAllPromotions')
 // 获取订单分页列表
 export const reqOrders = (pageNum, pageSize) => ajax('/manage/order/list', {pageNum, pageSize})
 // 删除指定名称的图片
