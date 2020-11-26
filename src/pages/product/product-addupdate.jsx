@@ -124,15 +124,12 @@ export default class ProductAddUpdate extends Component {
     // console.log(image, description, pk_product_id, fk_category_id)
     // console.log(options)
 
-    let pCategoryId = null, categoryId = fk_category_id
+    let pCategoryId = 0, categoryId = fk_category_id
     for (let i = 0; i < options.length; i++) {
       if (options[i].children) {
         console.log(options[i].value)
         pCategoryId = options[i].value
       }
-    }
-    if (isUpdate) {
-      pCategoryId = 1
     }
     console.log(pCategoryId, categoryId)
 
@@ -218,7 +215,7 @@ export default class ProductAddUpdate extends Component {
 
     return (
       <Card title={title} style={{height: 800}}>
-        <Form ref={this.formRef} onFinish={onFinish} initialValues={
+        {options.length > 0 ? <Form ref={this.formRef} onFinish={onFinish} initialValues={
           pCategoryId === 0 ? {categoryIds: [categoryId]} : {categoryIds: [pCategoryId, categoryId]}
         }>
           <Form.Item name="name" label="商品名称：" rules={[
@@ -245,7 +242,7 @@ export default class ProductAddUpdate extends Component {
           <Form.Item style={{marginTop: 50, textAlign: "center"}}>
             <Button type='primary' htmlType="submit">提交</Button>
           </Form.Item>
-        </Form>
+        </Form> : null}
       </Card>
     )
   }
