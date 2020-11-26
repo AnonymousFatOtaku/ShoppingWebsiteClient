@@ -35,6 +35,10 @@ const menuUtils = [
     path: '/order',
     rightId: 18,
   },
+  {
+    name: '活动管理',
+    path: '/promotion',
+  },
 ]
 
 export default menuUtils
