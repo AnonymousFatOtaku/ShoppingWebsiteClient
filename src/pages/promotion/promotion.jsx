@@ -18,8 +18,9 @@ import moment from 'moment';
 import 'moment/locale/zh-cn';
 import locale from 'antd/lib/locale/zh_CN';
 import {formateDate} from "../../utils/dateUtils"
-import {reqPromotions, reqAddOrUpdatePromotion} from "../../api/index";
+import {reqPromotions, reqAddOrUpdatePromotion, reqDeletePromotion} from "../../api/index";
 import './promotion.less'
+import cookieUtils from "../../utils/cookieUtils";
 
 const {TextArea} = Input;
 const {RangePicker} = DatePicker;
@@ -79,7 +80,7 @@ export default class User extends Component {
           <span>
             <a onClick={() => this.showUpdate(promotion)}>修改活动&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a>设置活动商品&nbsp;&nbsp;&nbsp;&nbsp;</a>
-            <a>删除活动</a>
+            <a onClick={() => this.deletePromotion(promotion)}>删除活动</a>
           </span>
         )
       },
@@ -211,6 +212,20 @@ export default class User extends Component {
 
     this.setState({
       visible: false
+    })
+  }
+
+  // 删除指定活动
+  deletePromotion = (promotion) => {
+    Modal.confirm({
+      title: `确认删除${promotion.name}活动吗?`,
+      onOk: async () => {
+        const result = await reqDeletePromotion(promotion.pk_promotion_id)
+        if (result.status === 0) {
+          message.success('删除活动成功')
+          this.getPromotions()
+        }
+      }
     })
   }
 
