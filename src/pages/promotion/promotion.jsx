@@ -12,13 +12,20 @@ import {
   message,
   InputNumber,
   DatePicker,
-  ConfigProvider
+  ConfigProvider,
+  Transfer
 } from 'antd';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
 import locale from 'antd/lib/locale/zh_CN';
 import {formateDate} from "../../utils/dateUtils"
-import {reqPromotions, reqAddOrUpdatePromotion, reqDeletePromotion} from "../../api/index";
+import {
+  reqPromotions,
+  reqAddOrUpdatePromotion,
+  reqDeletePromotion,
+  reqPromotionProducts,
+  reqProducts
+} from "../../api/index";
 import './promotion.less'
 import cookieUtils from "../../utils/cookieUtils";
 
@@ -30,6 +37,9 @@ export default class User extends Component {
   state = {
     promotions: [], // 所有活动列表
     visible: false, // 添加/修改窗口是否可见
+    visibleProducts: false, // 活动商品窗口是否可见
+    mockData: [],
+    targetKeys: [],
   };
 
   formRef = React.createRef();
@@ -95,7 +105,7 @@ export default class User extends Component {
         render: (promotion) => (
           <span>
             <a onClick={() => this.showUpdate(promotion)}>修改活动&nbsp;&nbsp;&nbsp;&nbsp;</a>
-            <a>设置活动商品&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={() => this.showProducts(promotion)}>设置活动商品&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.deletePromotion(promotion)}>删除活动</a>
           </span>
         )
@@ -131,11 +141,21 @@ export default class User extends Component {
     })
   }
 
+  // 显示活动商品界面
+  showProducts = (promotion) => {
+    this.promotion = promotion
+    this.setState({
+      visibleProducts: true
+    })
+    this.getMock(promotion)
+  }
+
   handleCancel = () => {
     // 重置表单所有内容
     this.formRef.current.resetFields()
     this.setState({
       visible: false,
+      visibleProducts: false,
     })
   }
 
@@ -245,17 +265,61 @@ export default class User extends Component {
     })
   }
 
+  // 获取设置穿梭框数据源
+  getMock = async (promotion) => {
+    console.log(promotion)
+    const targetKeys = [];
+    const mockData = [];
+
+    // 获取所有商品和参加选中活动的商品
+    const promotionProductsResult = await reqPromotionProducts(promotion.pk_promotion_id)
+    const productsResult = await reqProducts()
+    console.log(promotionProductsResult.data, productsResult.data)
+
+    // 将参加选中活动的商品id单独保存到数组中方便比对
+    let promotionProducts = []
+    for (let i = 0; i < promotionProductsResult.data.length; i++) {
+      promotionProducts.push(promotionProductsResult.data[i].fk_product_id)
+    }
+    console.log(promotionProducts)
+
+    // 将所有商品添加到穿梭框中，如果商品id出现在参加选中活动的商品id数组中则默认选中该商品
+    for (let i = 0; i < productsResult.data.length; i++) {
+      const data = {
+        key: productsResult.data[i].pk_product_id,
+        title: productsResult.data[i].name,
+        chosen: promotionProducts.indexOf(productsResult.data[i].pk_product_id) != -1,
+      };
+      if (data.chosen) {
+        targetKeys.push(data.key);
+      }
+      mockData.push(data);
+    }
+    this.setState({mockData, targetKeys});
+  };
+
+  filterOption = (inputValue, option) => option.description.indexOf(inputValue) > -1;
+
+  handleChange = targetKeys => {
+    this.setState({targetKeys});
+  };
+
+  handleSearch = (dir, value) => {
+    console.log('search:', dir, value);
+  };
+
   componentWillMount() {
     this.initColumns()
   }
 
   componentDidMount() {
     this.getPromotions()
+
   }
 
   render() {
 
-    let {promotions, visible} = this.state
+    let {promotions, visible, visibleProducts} = this.state
     console.log(promotions)
 
     let promotion = this.promotion || {}
@@ -300,6 +364,26 @@ export default class User extends Component {
               <Form.Item name="time" label="活动时间：">
                 <RangePicker showTime style={{width: 402}} disabledDate={disabledDate}
                              defaultValue={promotion.start_time === undefined ? null : [moment(startTime), moment(endTime)]}/>
+              </Form.Item>
+            </Form>
+          </Modal>
+          <Modal title={'设置活动商品'} visible={visibleProducts} onOk={this.addOrUpdatePromotion}
+                 onCancel={this.handleCancel} destroyOnClose>
+            <Form preserve={false} ref={this.formRef}>
+              <Form.Item name="products">
+                <Transfer
+                  dataSource={this.state.mockData}
+                  showSearch
+                  filterOption={this.filterOption}
+                  targetKeys={this.state.targetKeys}
+                  onChange={this.handleChange}
+                  onSearch={this.handleSearch}
+                  render={item => item.title}
+                  listStyle={{
+                    width: 300,
+                    height: 300,
+                  }}
+                />
               </Form.Item>
             </Form>
           </Modal>
