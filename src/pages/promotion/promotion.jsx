@@ -78,7 +78,8 @@ export default class User extends Component {
         render: (promotion) => (
           <span>
             <a onClick={() => this.showUpdate(promotion)}>修改活动&nbsp;&nbsp;&nbsp;&nbsp;</a>
-            <a onClick={() => this.deletePromotion(promotion)}>删除活动</a>
+            <a>设置活动商品&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a>删除活动</a>
           </span>
         )
       },
@@ -125,19 +126,48 @@ export default class User extends Component {
   addOrUpdatePromotion = async () => {
     // 收集输入数据
     let {name, description, discount, time} = this.formRef.current.getFieldsValue({promotion: Object})
-    if (time === undefined) {
+    console.log(name, description, discount, time)
+
+    // 如果是修改则对未修改参数赋初始值
+    if (this.promotion) {
+      console.log(this.promotion)
+      if (name === undefined) {
+        name = this.promotion.name
+      }
+      if (description === undefined) {
+        description = this.promotion.description
+      }
+      if (discount === undefined) {
+        discount = this.promotion.discount
+      }
+      if (time === undefined) {
+        time = "未修改"
+      }
+    }
+    console.log(name, description, discount, time)
+
+    if (time === undefined || time === null) {
       message.error('活动时间不能为空');
       return
     }
-    let start_time = time[0].format('YYYY-MM-DD HH:MM:SS'), end_time = time[1].format('YYYY-MM-DD HH:MM:SS')
+    let start_time, end_time
+    if (time !== "未修改") {
+      start_time = time[0].format('YYYY-MM-DD HH:mm:ss')
+      end_time = time[1].format('YYYY-MM-DD HH:mm:ss')
+    } else {
+      start_time = formateDate(this.promotion.start_time)
+      end_time = formateDate(this.promotion.end_time)
+    }
     console.log(name, description, discount, start_time, end_time)
 
     // 新增之前先判定新增的活动是否已存在
-    const {promotions} = this.state
-    for (let i = 0; i < promotions.length; i++) {
-      if (name === promotions[i].name) {
-        message.error('该活动已存在');
-        return
+    if (!this.promotion) {
+      const {promotions} = this.state
+      for (let i = 0; i < promotions.length; i++) {
+        if (name === promotions[i].name) {
+          message.error('该活动已存在');
+          return
+        }
       }
     }
 
@@ -166,9 +196,12 @@ export default class User extends Component {
     }
 
     let promotion = {name, description, discount, start_time, end_time}
+    if (this.promotion) {
+      promotion.pk_promotion_id = this.promotion.pk_promotion_id
+    }
     // 重置所有输入内容
     this.formRef.current.resetFields()
-    // 提交添加的请求
+    // 提交添加/修改的请求
     const result = await reqAddOrUpdatePromotion(promotion)
     // 若添加成功则刷新列表显示
     if (result.status === 0) {
@@ -197,6 +230,11 @@ export default class User extends Component {
     let promotion = this.promotion || {}
     console.log(promotion)
 
+    // 格式化时间
+    let startTime = formateDate(promotion.start_time)
+    let endTime = formateDate(promotion.end_time)
+    console.log(startTime, endTime)
+
     // 顶部左侧按钮
     const title = (
       <div>
@@ -219,17 +257,18 @@ export default class User extends Component {
                  onCancel={this.handleCancel} destroyOnClose>
             <Form preserve={false} ref={this.formRef}>
               <Form.Item name="name" label="活动名：">
-                <Input placeholder="请输入活动名(15字以内)" maxLength={15}/>
+                <Input placeholder="请输入活动名(15字以内)" maxLength={15} defaultValue={promotion.name}/>
               </Form.Item>
               <Form.Item name="description" label="活动描述：">
-                <TextArea rows={4} placeholder="请输入活动描述(100字以内)" maxLength={100}/>
+                <TextArea rows={4} placeholder="请输入活动描述(100字以内)" maxLength={100} defaultValue={promotion.description}/>
               </Form.Item>
               <Form.Item name="discount" label="折扣：">
                 <InputNumber min={0} max={99} formatter={value => `${value}%`} parser={value => value.replace('%', '')}
-                             style={{width: 402}}/>
+                             style={{width: 402}} defaultValue={promotion.discount}/>
               </Form.Item>
               <Form.Item name="time" label="活动时间：">
-                <RangePicker showTime style={{width: 402}} disabledDate={disabledDate}/>
+                <RangePicker showTime style={{width: 402}} disabledDate={disabledDate}
+                             defaultValue={promotion.start_time === undefined ? null : [moment(startTime), moment(endTime)]}/>
               </Form.Item>
             </Form>
           </Modal>
