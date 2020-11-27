@@ -75,6 +75,22 @@ export default class User extends Component {
         render: formateDate
       },
       {
+        title: '活动状态',
+        render: (promotion) => {
+          let curDate = new Date();
+          curDate = formateDate(curDate)
+          let startTime = formateDate(promotion.start_time), endTime = formateDate(promotion.end_time)
+          // console.log(startTime, endTime, curDate)
+          if (startTime > curDate) { // 开始时间晚于当前时间
+            return (<span>未开始</span>)
+          }
+          if (endTime < curDate) { // 结束时间早于当前时间
+            return (<span style={{color: "red"}}>已结束</span>)
+          }
+          return (<span style={{color: "green"}}>进行中</span>)
+        }
+      },
+      {
         title: '操作',
         render: (promotion) => (
           <span>
