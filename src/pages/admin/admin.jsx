@@ -10,7 +10,7 @@ import Product from "../product/index";
 import Role from "../role/role";
 import User from "../user/user";
 import Promotion from "../promotion/promotion";
-// import Order from "../order/order";
+import Order from "../order/order";
 // import UserOrder from "../user-order/user-order";
 // import UserProduct from "../user-product/user-product";
 import memoryUtils from "../../utils/memoryUtils";
@@ -87,18 +87,9 @@ export default class Admin extends Component {
                 {/*  {menus.indexOf("/role") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
               <Route path='/promotion' component={Promotion}></Route>
-              {/*<Route path="/bar" component={Bar}>*/}
-              {/*  {menus.indexOf("/bar") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
-              {/*<Route path="/pie" component={Pie}>*/}
-              {/*  {menus.indexOf("/pie") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
-              {/*<Route path="/line" component={Line}>*/}
-              {/*  {menus.indexOf("/line") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
-              {/*<Route path="/order" component={Order}>*/}
-              {/*  {menus.indexOf("/order") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
+              <Route path="/order" component={Order}>
+                {/*  {menus.indexOf("/order") === -1 ? <Redirect to="/home"/> : null}*/}
+              </Route>
               {/*<Route path="/userProduct" component={UserProduct}>*/}
               {/*  {menus.indexOf("/userProduct") === -1 ? <Redirect to="/home"/> : null}*/}
               {/*</Route>*/}
