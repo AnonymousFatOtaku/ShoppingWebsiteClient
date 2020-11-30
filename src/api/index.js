@@ -77,6 +77,8 @@ export const reqSetPromotionProducts = (products, pk_promotion_id) => ajax('/pro
   products,
   pk_promotion_id
 }, 'POST')
+// 获取活动商品列表
+export const reqAllPromotionProducts = () => ajax('/promotion/getAllPromotionProducts')
 // 获取订单分页列表
 export const reqOrders = (pageNum, pageSize) => ajax('/manage/order/list', {pageNum, pageSize})
 // 删除指定名称的图片

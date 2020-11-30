@@ -26,6 +26,7 @@ import {
   reqPromotionProducts,
   reqProducts,
   reqSetPromotionProducts,
+  reqAllPromotionProducts,
 } from "../../api/index";
 import './promotion.less'
 
@@ -271,10 +272,11 @@ export default class User extends Component {
     const targetKeys = [];
     const mockData = [];
 
-    // 获取所有商品和参加选中活动的商品
+    // 获取所有商品和参加选中/所有活动的商品，一个商品只能同时参加一个活动
     const promotionProductsResult = await reqPromotionProducts(promotion.pk_promotion_id)
     const productsResult = await reqProducts()
-    console.log(promotionProductsResult.data, productsResult.data)
+    const allProductsResult = await reqAllPromotionProducts()
+    console.log(promotionProductsResult.data, productsResult.data, allProductsResult.data)
 
     // 将参加选中活动的商品id单独保存到数组中方便比对
     let promotionProducts = []
@@ -283,6 +285,13 @@ export default class User extends Component {
     }
     console.log(promotionProducts)
 
+    // 获取所有参加活动的商品的数组
+    let allProducts = []
+    for (let i = 0; i < allProductsResult.data.length; i++) {
+      allProducts.push(allProductsResult.data[i].fk_product_id)
+    }
+    console.log(allProducts)
+
     // 将所有商品添加到穿梭框中，如果商品id出现在参加选中活动的商品id数组中则默认选中该商品
     for (let i = 0; i < productsResult.data.length; i++) {
       const data = {
@@ -290,10 +299,14 @@ export default class User extends Component {
         title: productsResult.data[i].name,
         chosen: promotionProducts.indexOf(productsResult.data[i].pk_product_id) != -1,
       };
+      // console.log(data, allProducts.indexOf(data.key))
       if (data.chosen) {
         targetKeys.push(data.key);
+        mockData.push(data);
       }
-      mockData.push(data);
+      if (allProducts.indexOf(data.key) === -1) {
+        mockData.push(data);
+      }
     }
     this.setState({mockData, targetKeys});
   };
