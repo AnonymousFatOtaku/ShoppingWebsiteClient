@@ -24,10 +24,10 @@ import {
   reqAddOrUpdatePromotion,
   reqDeletePromotion,
   reqPromotionProducts,
-  reqProducts
+  reqProducts,
+  reqSetPromotionProducts,
 } from "../../api/index";
 import './promotion.less'
-import cookieUtils from "../../utils/cookieUtils";
 
 const {TextArea} = Input;
 const {RangePicker} = DatePicker;
@@ -308,13 +308,42 @@ export default class User extends Component {
     console.log('search:', dir, value);
   };
 
+  // 设置活动商品
+  setPromotionProducts = async () => {
+    // 收集输入数据
+    let products = this.formRef.current.getFieldsValue({products: Object})
+    // console.log(products, products.products)
+    // console.log(this.promotion)
+
+    // undefined为未作修改，需获取当前活动商品列表
+    if (products.products === undefined) {
+      // 获取参加选中活动的商品
+      let promotionProductsResult = await reqPromotionProducts(this.promotion.pk_promotion_id)
+      // console.log(promotionProductsResult.data)
+      // 将参加选中活动的商品id单独保存到数组中
+      let promotionProducts = []
+      for (let i = 0; i < promotionProductsResult.data.length; i++) {
+        promotionProducts.push(promotionProductsResult.data[i].fk_product_id)
+      }
+      // console.log(promotionProducts)
+      products = promotionProducts
+    }
+
+    // console.log(products)
+    let data = await reqSetPromotionProducts(products, this.promotion.pk_promotion_id)
+    message.success('设置活动商品成功')
+
+    this.setState({
+      visibleProducts: false
+    })
+  }
+
   componentWillMount() {
     this.initColumns()
   }
 
   componentDidMount() {
     this.getPromotions()
-
   }
 
   render() {
@@ -367,7 +396,7 @@ export default class User extends Component {
               </Form.Item>
             </Form>
           </Modal>
-          <Modal title={'设置活动商品'} visible={visibleProducts} onOk={this.addOrUpdatePromotion}
+          <Modal title={'设置活动商品'} visible={visibleProducts} onOk={this.setPromotionProducts}
                  onCancel={this.handleCancel} destroyOnClose>
             <Form preserve={false} ref={this.formRef}>
               <Form.Item name="products">
