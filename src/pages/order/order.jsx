@@ -1,8 +1,9 @@
 // 订单管理路由
 import React, {Component} from "react";
-import {Button, Card, Space, Table, Modal, Select, Input, Form} from 'antd';
+import {Button, Card, Space, Table, Modal, Select, Input, Form, message} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
-import {reqOrders, reqSearchOrders} from "../../api/index";
+import {reqDeleteOrder, reqOrders, reqSearchOrders} from "../../api/index";
+import cookieUtils from "../../utils/cookieUtils";
 
 export default class Order extends Component {
 
@@ -58,6 +59,16 @@ export default class Order extends Component {
         dataIndex: 'gmt_modified',
         render: (orderTime) => formateDate(orderTime)
       },
+      {
+        title: '操作',
+        render: (order) => (
+          <span>
+            <a>查看详情&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a>修改订单&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={() => this.deleteOrder(order)}>删除订单</a>
+          </span>
+        )
+      },
     ];
   }
 
@@ -81,6 +92,21 @@ export default class Order extends Component {
         orders: orders
       })
     }
+  }
+
+  // 删除订单
+  deleteOrder = (order) => {
+    console.log(order)
+    Modal.confirm({
+      title: `确认删除编号为${order.pk_order_id}的订单吗?`,
+      onOk: async () => {
+        const result = await reqDeleteOrder(order.pk_order_id)
+        if (result.status === 0) {
+          message.success('删除订单成功')
+          this.getOrders()
+        }
+      }
+    })
   }
 
   componentWillMount() {
