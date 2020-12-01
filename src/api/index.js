@@ -87,6 +87,14 @@ export const reqDeleteImg = (name) => ajax('/manage/img/delete', {name}, 'POST')
 export const reqSearchOrders = ({searchName, searchType}) => ajax('/order/searchOrders', {searchName, searchType})
 // 删除指定活动
 export const reqDeleteOrder = (pk_order_id) => ajax('/order/deleteOrder', {pk_order_id}, 'POST')
+// 更新指定活动
+export const reqUpdateOrder = (name, phone, address, payment, pk_order_id) => ajax('/order/updateOrder', {
+  name,
+  phone,
+  address,
+  payment,
+  pk_order_id
+}, 'POST')
 // 获取展示给用户的商品列表
 export const reqUserProduct = (pageNum, pageSize) => ajax('/manage/userProduct/list', {pageNum, pageSize})
 // 根据商品名称/商品描述搜索商品分页列表，搜索的类型：productName/productDesc

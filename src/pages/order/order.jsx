@@ -1,9 +1,8 @@
 // 订单管理路由
 import React, {Component} from "react";
-import {Button, Card, Space, Table, Modal, Select, Input, Form, message} from 'antd';
+import {Button, Card, Space, Table, Modal, Select, Input, Form, message, InputNumber} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
-import {reqDeleteOrder, reqOrders, reqSearchOrders} from "../../api/index";
-import cookieUtils from "../../utils/cookieUtils";
+import {reqAddOrUpdateUser, reqDeleteOrder, reqOrders, reqSearchOrders, reqUpdateOrder} from "../../api/index";
 
 export default class Order extends Component {
 
@@ -12,7 +11,10 @@ export default class Order extends Component {
     loading: false, // 是否正在加载中
     searchName: '', // 搜索的关键字
     searchType: 'productId', // 根据哪个字段搜索
+    visible: false,
   };
+
+  formRef = React.createRef();
 
   initColumns = () => {
     this.columns = [
@@ -64,7 +66,7 @@ export default class Order extends Component {
         render: (order) => (
           <span>
             <a>查看详情&nbsp;&nbsp;&nbsp;&nbsp;</a>
-            <a>修改订单&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={() => this.showUpdate(order)}>修改订单&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.deleteOrder(order)}>删除订单</a>
           </span>
         )
@@ -109,18 +111,89 @@ export default class Order extends Component {
     })
   }
 
+  // 显示修改界面
+  showUpdate = (order) => {
+    this.order = order // 保存order
+    this.setState({
+      visible: true
+    })
+  }
+
+  handleCancel = () => {
+    // 重置表单所有内容
+    this.formRef.current.resetFields()
+    this.setState({
+      visible: false,
+    });
+  };
+
+  // 添加/修改用户
+  updateOrder = async () => {
+    // 收集输入数据
+    const order = this.formRef.current.getFieldsValue({order: Object})
+
+    // 判定是否是修改，如果是修改则要给未改动的参数赋原值
+    if (this.order) {
+      if (order.name === undefined) {
+        order.name = this.order.name
+      }
+      if (order.phone === undefined) {
+        order.phone = this.order.phone
+      }
+      if (order.address === undefined) {
+        order.address = this.order.address
+      }
+      if (order.payment === undefined) {
+        order.payment = this.order.payment
+      }
+      if (order.pk_order_id === undefined) {
+        order.pk_order_id = this.order.pk_order_id
+      }
+    }
+    console.log(order, this.order)
+
+    let phoneReg = /^1[3456789]\d{9}$/
+    // 对所有输入内容依次进行验证，验证不通过不关闭窗口且不执行任何操作
+    if (!phoneReg.test(order.phone)) {
+      message.error('手机号格式不正确');
+      this.setState({
+        visible: true
+      })
+    } else if (order.payment < 0 || order.payment > 100000000) {
+      message.error('订单总价不能小于0或大于1亿');
+      this.setState({
+        visible: true
+      })
+    } else { // 所有验证都通过才执行修改操作
+      // 重置所有输入内容
+      this.formRef.current.resetFields()
+      // 提交添加的请求
+      const result = await reqUpdateOrder(order.name, order.phone, order.address, order.payment, order.pk_order_id)
+      // 刷新列表显示
+      if (result.status === 0) {
+        message.success(`订单${order.pk_order_id}修改成功`)
+        this.getOrders()
+      }
+      this.setState({
+        visible: false
+      })
+    }
+  }
+
   componentWillMount() {
     this.initColumns()
   }
 
   componentDidMount() {
-    this.getOrders(1)
+    this.getOrders()
   }
 
   render() {
 
     // 取出状态数据
-    const {loading, orders, searchType, searchName} = this.state
+    const {loading, orders, searchType, searchName, visible} = this.state
+    let order = this.order || {}
+    console.log(order)
     const {Option} = Select;
 
     // 顶部左侧搜索栏
@@ -144,6 +217,25 @@ export default class Order extends Component {
                pagination={{
                  current: this.pageNum, defaultPageSize: 9, showQuickJumper: true, onChange: this.getOrders
                }}/>
+        <Modal title='修改订单' visible={visible} onOk={this.updateOrder} onCancel={this.handleCancel} destroyOnClose>
+          <Form preserve={false} ref={this.formRef}>
+            <Form.Item name="name" label="买家名字：">
+              <Input placeholder="请输入买家名字" style={{width: 400, float: "right"}} defaultValue={order.name}/>
+            </Form.Item>
+            <Form.Item name="phone" label="买家电话：" rules={[
+              {min: 11, max: 11, message: '手机号长度应为11位'},
+              {pattern: /^1[3456789]\d{9}$/, message: '手机号格式不正确'},
+            ]}>
+              <Input placeholder="请输入买家电话" style={{width: 400, float: "right"}} defaultValue={order.phone}/>
+            </Form.Item>
+            <Form.Item name="address" label="买家地址：">
+              <Input placeholder="请输入买家地址" style={{width: 400, float: "right"}} defaultValue={order.address}/>
+            </Form.Item>
+            <Form.Item name="payment" label="订单总价：">
+              <InputNumber placeholder="请输入订单总价" style={{width: 400, float: "right"}} defaultValue={order.payment}/>
+            </Form.Item>
+          </Form>
+        </Modal>
       </Card>
     )
   }
