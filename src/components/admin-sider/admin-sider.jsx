@@ -62,6 +62,9 @@ class AdminSider extends Component {
     if (path === "/product/info" || path === "/product/addupdate") {
       path = "/product"
     }
+    if (path === "/order/info") {
+      path = "/order"
+    }
 
     // 在刷新后保持当前选中的子菜单项所在菜单列表为展开状态
     if (path === "/category" || path === "/product") {

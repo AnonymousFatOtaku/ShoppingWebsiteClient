@@ -10,7 +10,7 @@ import Product from "../product/index";
 import Role from "../role/role";
 import User from "../user/user";
 import Promotion from "../promotion/promotion";
-import Order from "../order/order";
+import Order from "../order/index";
 // import UserOrder from "../user-order/user-order";
 // import UserProduct from "../user-product/user-product";
 import memoryUtils from "../../utils/memoryUtils";

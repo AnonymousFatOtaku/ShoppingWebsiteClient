@@ -95,6 +95,8 @@ export const reqUpdateOrder = (name, phone, address, payment, pk_order_id) => aj
   payment,
   pk_order_id
 }, 'POST')
+// 根据订单id获取订单详情
+export const reqOrderInfo = (fk_order_id) => ajax('/order/getOrderInfoByOrderId', {fk_order_id})
 // 获取展示给用户的商品列表
 export const reqUserProduct = (pageNum, pageSize) => ajax('/manage/userProduct/list', {pageNum, pageSize})
 // 根据商品名称/商品描述搜索商品分页列表，搜索的类型：productName/productDesc

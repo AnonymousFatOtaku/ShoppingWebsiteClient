@@ -2,7 +2,7 @@
 import React, {Component} from "react";
 import {Button, Card, Space, Table, Modal, Select, Input, Form, message, InputNumber} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
-import {reqAddOrUpdateUser, reqDeleteOrder, reqOrders, reqSearchOrders, reqUpdateOrder} from "../../api/index";
+import {reqDeleteOrder, reqOrders, reqSearchOrders, reqUpdateOrder} from "../../api/index";
 
 export default class Order extends Component {
 
@@ -65,7 +65,7 @@ export default class Order extends Component {
         title: '操作',
         render: (order) => (
           <span>
-            <a>查看详情&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={() => this.props.history.push('/order/info', {order})}>查看详情&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.showUpdate(order)}>修改订单&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.deleteOrder(order)}>删除订单</a>
           </span>
