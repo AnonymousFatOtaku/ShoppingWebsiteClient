@@ -10,7 +10,7 @@ export default class Order extends Component {
     orders: [], // 所有订单列表
     loading: false, // 是否正在加载中
     searchName: '', // 搜索的关键字
-    searchType: 'productName', // 根据哪个字段搜索
+    searchType: 'productId', // 根据哪个字段搜索
   };
 
   initColumns = () => {
@@ -61,21 +61,21 @@ export default class Order extends Component {
     ];
   }
 
-  // 获取指定页码的订单列表数据显示
-  getOrders = async (pageNum) => {
-    this.pageNum = pageNum // 保存pageNum
+  // 获取订单列表数据显示
+  getOrders = async () => {
     this.setState({loading: true}) // 显示loading
     const {searchName, searchType} = this.state
+    console.log(searchName, searchType)
     let result
-    if (searchName) { // 如果搜索关键字有值说明要做搜索分页
-      result = await reqSearchOrders({pageNum, pageSize: 9, searchName, searchType})
-    } else { // 一般分页请求
+    if (searchName) { // 如果搜索关键字有值说明要做搜索
+      result = await reqSearchOrders({searchName, searchType})
+    } else {
       result = await reqOrders()
     }
     console.log(result)
     this.setState({loading: false}) // 隐藏loading
-    if (result.status === 0) {
-      // 取出分页数据，更新状态，显示分页列表
+    if (result != undefined && result.status === 0) {
+      // 取出数据，更新状态，显示列表
       const orders = result.data
       this.setState({
         orders: orders
@@ -102,12 +102,12 @@ export default class Order extends Component {
       <span>
         <Select style={{width: 200, marginRight: 20}} value={searchType}
                 onChange={value => this.setState({searchType: value})}>
-          <Option value='productName'>按名称搜索</Option>
-          <Option value='username'>按用户搜索</Option>
+          <Option value='productId'>根据订单id搜索</Option>
+          <Option value='userId'>根据用户id搜索</Option>
         </Select>
         <Input placeholder='关键字' style={{width: 200, marginRight: 20}} value={searchName}
                onChange={event => this.setState({searchName: event.target.value})}/>
-        {/*<Button type='primary' onClick={() => this.getOrders(1)}>搜索</Button>*/}
+        <Button type='primary' onClick={() => this.getOrders()}>搜索</Button>
       </span>
     )
 

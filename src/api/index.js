@@ -83,12 +83,8 @@ export const reqAllPromotionProducts = () => ajax('/promotion/getAllPromotionPro
 export const reqOrders = () => ajax('/order/getAllOrders')
 // 删除指定名称的图片
 export const reqDeleteImg = (name) => ajax('/manage/img/delete', {name}, 'POST')
-// 根据商品名称/商品类型/用户名搜索订单分页列表
-export const reqSearchOrders = ({pageNum, pageSize, searchName, searchType}) => ajax('/manage/order/search', {
-  pageNum,
-  pageSize,
-  [searchType]: searchName,
-})
+// 根据商品id/用户id搜索订单列表
+export const reqSearchOrders = ({searchName, searchType}) => ajax('/order/searchOrders', {searchName, searchType})
 // 获取展示给用户的商品列表
 export const reqUserProduct = (pageNum, pageSize) => ajax('/manage/userProduct/list', {pageNum, pageSize})
 // 根据商品名称/商品描述搜索商品分页列表，搜索的类型：productName/productDesc
