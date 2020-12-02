@@ -11,13 +11,10 @@ import Role from "../role/role";
 import User from "../user/user";
 import Promotion from "../promotion/promotion";
 import Order from "../order/index";
-// import UserOrder from "../user-order/user-order";
-// import UserProduct from "../user-product/user-product";
-import memoryUtils from "../../utils/memoryUtils";
 import ProductInfo from '../product/product-info'
+import Log from "../log/log";
 // import NotFound from '../not-found/not-found'
 import './admin.less';
-import {reqRoles} from "../../api";
 import cookieUtils from "../../utils/cookieUtils";
 
 const {Header, Footer, Sider, Content} = Layout;
@@ -27,22 +24,6 @@ export default class Admin extends Component {
   state = {
     menus: [], // 登录用户的权限数组
   }
-
-  // 获取登录用户的权限数组
-  /*getMenus = async () => {
-    const result = await reqRoles()
-    if (result.status === 0) {
-      const roles = result.data
-      for (let i = 0; i < roles.length; i++) {
-        // console.log(roles[i]._id)
-        if (memoryUtils.user.role_id === roles[i]._id) {
-          this.setState({
-            menus: roles[i].menus
-          })
-        }
-      }
-    }
-  }*/
 
   componentDidMount() {
     // this.getMenus()
@@ -90,13 +71,8 @@ export default class Admin extends Component {
               <Route path="/order" component={Order}>
                 {/*  {menus.indexOf("/order") === -1 ? <Redirect to="/home"/> : null}*/}
               </Route>
-              {/*<Route path="/userProduct" component={UserProduct}>*/}
-              {/*  {menus.indexOf("/userProduct") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
-              {/*<Route path="/userOrder" component={UserOrder}>*/}
-              {/*  {menus.indexOf("/userOrder") === -1 ? <Redirect to="/home"/> : null}*/}
-              {/*</Route>*/}
               <Route path="/ProductInfo" component={ProductInfo}> </Route>
+              <Route path='/log' component={Log}></Route>
               {/*<Route component={NotFound}/>*/}
             </Switch>
           </Content>

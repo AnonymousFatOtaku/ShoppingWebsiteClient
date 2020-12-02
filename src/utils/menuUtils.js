@@ -39,6 +39,10 @@ const menuUtils = [
     name: '活动管理',
     path: '/promotion',
   },
+  {
+    name: '日志管理',
+    path: '/log',
+  },
 ]
 
 export default menuUtils

@@ -122,6 +122,11 @@ class AdminSider extends Component {
               活动管理
             </Link>
           </Menu.Item>
+          <Menu.Item key="/log" icon={<BarsOutlined/>}>
+            <Link to='/log'>
+              日志管理
+            </Link>
+          </Menu.Item>
         </Menu>
       </div>
     )
