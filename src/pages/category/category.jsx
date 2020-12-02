@@ -5,8 +5,9 @@ import {
   PlusOutlined,
   ArrowRightOutlined,
 } from '@ant-design/icons';
-import {reqCategorys, reqUpdateCategory, reqAddCategory} from '../../api'
+import {reqCategorys, reqUpdateCategory, reqAddCategory, reqAddLog} from '../../api'
 import {formateDate} from "../../utils/dateUtils"
+import cookieUtils from "../../utils/cookieUtils";
 
 const {TextArea} = Input;
 
@@ -164,6 +165,7 @@ export default class Category extends Component {
       }
       // 提交添加分类的请求
       const result = await reqAddCategory(parentId, categoryName, categoryDescription)
+      const logResult = await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了分类' + categoryName, cookieUtils.getUserCookie().pk_user_id)
       // console.log(result.status, parentId)
       // 如果添加成功刷新显示并弹出提示成功的消息
       if (result.status === 0) {
@@ -244,6 +246,7 @@ export default class Category extends Component {
       console.log(categoryName, categoryDescription, categoryId)
       // 提交修改分类的请求
       const result = await reqUpdateCategory({categoryName, categoryDescription, categoryId})
+      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + categoryId + '的分类', cookieUtils.getUserCookie().pk_user_id)
       // 如果修改成功刷新显示并弹出提示成功的消息
       if (result.status === 0) {
         // 重新显示列表

@@ -9,7 +9,7 @@ import {
   reqRoles,
   reqUserRole,
   reqUserRoles,
-  reqUpdateUserRole
+  reqUpdateUserRole, reqAddLog
 } from "../../api/index";
 import cookieUtils from "../../utils/cookieUtils";
 import './user.less'
@@ -146,8 +146,9 @@ export default class User extends Component {
     } else { // 所有验证都通过才执行添加/修改操作
       // 重置所有输入内容
       this.formRef.current.resetFields()
-      // 提交添加的请求
+      // 提交修改权限的请求
       const result = await reqUpdateUserRole(user)
+      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + user.pk_user_id + '的用户权限', cookieUtils.getUserCookie().pk_user_id)
       // 刷新列表显示
       if (result.status === 0) {
         message.success('修改用户权限成功')
@@ -172,6 +173,7 @@ export default class User extends Component {
           title: `确认删除${user.username}吗?`,
           onOk: async () => {
             const result = await reqDeleteUser(user.pk_user_id)
+            const logResult = await reqAddLog(1, cookieUtils.getUserCookie().username + '删除了id为' + user.pk_user_id + '的用户', cookieUtils.getUserCookie().pk_user_id)
             if (result.status === 0) {
               message.success('删除用户成功')
               this.getUsers()
@@ -248,6 +250,11 @@ export default class User extends Component {
       this.formRef.current.resetFields()
       // 提交添加的请求
       const result = await reqAddOrUpdateUser(user)
+      if (this.user) {
+        const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + user.pk_user_id + '的用户', cookieUtils.getUserCookie().pk_user_id)
+      } else {
+        const logResult = await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了名为' + user.username + '的用户', cookieUtils.getUserCookie().pk_user_id)
+      }
       // 刷新列表显示
       if (result.status === 0) {
         message.success(`${this.user ? '修改' : '添加'}用户成功`)

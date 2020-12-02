@@ -5,7 +5,8 @@ import {ArrowLeftOutlined,} from '@ant-design/icons';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import PicturesWall from './pictures-wall'
 import RichTextEditor from './rich-text-editor'
-import {reqCategorys, reqAddOrUpdateProduct, reqCategory} from '../../api'
+import {reqCategorys, reqAddOrUpdateProduct, reqCategory, reqAddLog} from '../../api'
+import cookieUtils from "../../utils/cookieUtils";
 
 export default class ProductAddUpdate extends Component {
 
@@ -203,6 +204,11 @@ export default class ProductAddUpdate extends Component {
         console.log(product);
         // 调用接口请求函数去添加/更新
         const result = await reqAddOrUpdateProduct(product)
+        if (product.pk_product_id) {
+          const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + product.pk_product_id + '的商品', cookieUtils.getUserCookie().pk_user_id)
+        } else {
+          const logResult = await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了商品' + name, cookieUtils.getUserCookie().pk_user_id)
+        }
         // 根据结果提示
         if (result.status === 0) {
           message.success(`${this.isUpdate ? '更新' : '添加'}商品成功`)

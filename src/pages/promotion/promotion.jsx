@@ -26,9 +26,10 @@ import {
   reqPromotionProducts,
   reqProducts,
   reqSetPromotionProducts,
-  reqAllPromotionProducts,
+  reqAllPromotionProducts, reqAddLog,
 } from "../../api/index";
 import './promotion.less'
+import cookieUtils from "../../utils/cookieUtils";
 
 const {TextArea} = Input;
 const {RangePicker} = DatePicker;
@@ -241,6 +242,11 @@ export default class User extends Component {
     this.formRef.current.resetFields()
     // 提交添加/修改的请求
     const result = await reqAddOrUpdatePromotion(promotion)
+    if (this.promotion) {
+      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + promotion.pk_promotion_id + '的活动', cookieUtils.getUserCookie().pk_user_id)
+    } else {
+      const logResult = await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了名为' + name + '的活动', cookieUtils.getUserCookie().pk_user_id)
+    }
     // 若添加成功则刷新列表显示
     if (result.status === 0) {
       message.success(`${this.promotion ? '修改' : '添加'}活动成功`)
@@ -258,6 +264,7 @@ export default class User extends Component {
       title: `确认删除${promotion.name}活动吗?`,
       onOk: async () => {
         const result = await reqDeletePromotion(promotion.pk_promotion_id)
+        const logResult = await reqAddLog(1, cookieUtils.getUserCookie().username + '删除了名为' + promotion.name + '的活动', cookieUtils.getUserCookie().pk_user_id)
         if (result.status === 0) {
           message.success('删除活动成功')
           this.getPromotions()
@@ -344,6 +351,7 @@ export default class User extends Component {
 
     // console.log(products)
     let data = await reqSetPromotionProducts(products, this.promotion.pk_promotion_id)
+    const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '设置了id为' + this.promotion.pk_promotion_id + '的活动商品', cookieUtils.getUserCookie().pk_user_id)
     message.success('设置活动商品成功')
 
     this.setState({

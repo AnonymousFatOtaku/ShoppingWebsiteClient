@@ -3,7 +3,7 @@ import React, {Component} from "react";
 import {withRouter} from 'react-router-dom'
 import {Modal} from 'antd'
 import {formateDate} from '../../utils/dateUtils'
-import {reqWeather} from '../../api'
+import {reqAddLog, reqWeather} from '../../api'
 import menuUtils from "../../utils/menuUtils";
 import cookieUtils from "../../utils/cookieUtils";
 import './admin-header.less';
@@ -57,8 +57,9 @@ class AdminHeader extends Component {
     // 显示确认框
     Modal.confirm({
       content: '是否确认退出?',
-      onOk: () => {
+      onOk: async () => {
         // 删除保存的user数据和token
+        const logResult = await reqAddLog(6, cookieUtils.getUserCookie().username + '退出登录', cookieUtils.getUserCookie().pk_user_id)
         cookieUtils.removeUserCookie()
         localStorage.removeItem('token')
         // 跳转到login

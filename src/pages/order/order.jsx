@@ -2,7 +2,8 @@
 import React, {Component} from "react";
 import {Button, Card, Space, Table, Modal, Select, Input, Form, message, InputNumber} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
-import {reqDeleteOrder, reqOrders, reqSearchOrders, reqUpdateOrder} from "../../api/index";
+import {reqAddLog, reqDeleteOrder, reqOrders, reqSearchOrders, reqUpdateOrder} from "../../api/index";
+import cookieUtils from "../../utils/cookieUtils";
 
 export default class Order extends Component {
 
@@ -65,7 +66,10 @@ export default class Order extends Component {
         title: '操作',
         render: (order) => (
           <span>
-            <a onClick={() => this.props.history.push('/order/info', {order})}>查看详情&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={async () => {
+              this.props.history.push('/order/info', {order})
+              const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了id为' + order.pk_order_id + '的订单详情', cookieUtils.getUserCookie().pk_user_id)
+            }}>查看详情&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.showUpdate(order)}>修改订单&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.deleteOrder(order)}>删除订单</a>
           </span>
@@ -82,8 +86,14 @@ export default class Order extends Component {
     let result
     if (searchName) { // 如果搜索关键字有值说明要做搜索
       result = await reqSearchOrders({searchName, searchType})
+      if (searchType === 'productId') {
+        const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了订单id为' + searchName + '的订单', cookieUtils.getUserCookie().pk_user_id)
+      } else if (searchType === 'userId') {
+        const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了用户id为' + searchName + '的订单', cookieUtils.getUserCookie().pk_user_id)
+      }
     } else {
       result = await reqOrders()
+      const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了全部订单', cookieUtils.getUserCookie().pk_user_id)
     }
     console.log(result)
     this.setState({loading: false}) // 隐藏loading
@@ -103,6 +113,7 @@ export default class Order extends Component {
       title: `确认删除编号为${order.pk_order_id}的订单吗?`,
       onOk: async () => {
         const result = await reqDeleteOrder(order.pk_order_id)
+        const logResult = await reqAddLog(1, cookieUtils.getUserCookie().username + '删除了id为' + order.pk_order_id + '的订单', cookieUtils.getUserCookie().pk_user_id)
         if (result.status === 0) {
           message.success('删除订单成功')
           this.getOrders()
@@ -127,7 +138,7 @@ export default class Order extends Component {
     });
   };
 
-  // 添加/修改用户
+  // 修改订单
   updateOrder = async () => {
     // 收集输入数据
     const order = this.formRef.current.getFieldsValue({order: Object})
@@ -169,6 +180,7 @@ export default class Order extends Component {
       this.formRef.current.resetFields()
       // 提交添加的请求
       const result = await reqUpdateOrder(order.name, order.phone, order.address, order.payment, order.pk_order_id)
+      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + order.pk_order_id + '的订单', cookieUtils.getUserCookie().pk_user_id)
       // 刷新列表显示
       if (result.status === 0) {
         message.success(`订单${order.pk_order_id}修改成功`)

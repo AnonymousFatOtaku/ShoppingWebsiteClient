@@ -2,8 +2,9 @@
 import React, {Component} from "react";
 import {Button, Card, Table, Select, Input, message} from 'antd';
 import {PlusOutlined} from '@ant-design/icons';
-import {reqProducts, reqUpdateStatus, reqSearchProducts} from '../../api'
+import {reqProducts, reqUpdateStatus, reqSearchProducts, reqAddLog} from '../../api'
 import {formateDate} from "../../utils/dateUtils";
+import cookieUtils from "../../utils/cookieUtils";
 
 export default class Product extends Component {
 
@@ -68,7 +69,10 @@ export default class Product extends Component {
         render: (product) => {
           return (
             <span>
-              <a onClick={() => this.props.history.push('/product/info', {product})}>详情&nbsp;&nbsp;</a>
+              <a onClick={async () => {
+                this.props.history.push('/product/info', {product})
+                const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了id为' + product.pk_product_id + '的商品详情', cookieUtils.getUserCookie().pk_user_id)
+              }}>详情&nbsp;&nbsp;</a>
               <a onClick={() => this.props.history.push('/product/addupdate', product)}>修改</a>
             </span>
           )
@@ -85,8 +89,14 @@ export default class Product extends Component {
     let result
     if (searchName) { // 如果搜索关键字有值说明要做搜索分页
       result = await reqSearchProducts({searchName, searchType})
+      if (searchType === 'productName') {
+        const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了商品名为' + searchName + '的商品', cookieUtils.getUserCookie().pk_user_id)
+      } else if (searchType === 'categoryId') {
+        const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了分类id为' + searchName + '的商品', cookieUtils.getUserCookie().pk_user_id)
+      }
     } else { // 一般分页请求
       result = await reqProducts()
+      const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了全部商品', cookieUtils.getUserCookie().pk_user_id)
     }
     console.log(result)
     this.setState({loading: false}) // 隐藏loading
@@ -103,6 +113,7 @@ export default class Product extends Component {
   // 更新指定商品的状态
   updateStatus = async (productId, status) => {
     const result = await reqUpdateStatus(productId, status)
+    const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '更新了id为' + productId + '的商品状态', cookieUtils.getUserCookie().pk_user_id)
     if (result.status === 0) {
       message.success('更新商品状态成功')
       this.getProducts(this.pageNum)

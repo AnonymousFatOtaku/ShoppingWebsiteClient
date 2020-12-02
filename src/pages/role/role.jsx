@@ -1,10 +1,8 @@
 // 角色管理路由
 import React, {Component} from "react";
 import {Button, Card, Table, Modal, Form, Input, message, Select} from 'antd';
-import {reqRoles, reqAddRole, reqUpdateRoleRights, reqUserRole} from '../../api'
-import memoryUtils from "../../utils/memoryUtils"
+import {reqRoles, reqAddRole, reqUpdateRoleRights, reqUserRole, reqAddLog} from '../../api'
 import {formateDate} from '../../utils/dateUtils'
-import storageUtils from "../../utils/storageUtils";
 import AuthForm from './auth-form'
 import cookieUtils from "../../utils/cookieUtils";
 
@@ -114,6 +112,7 @@ export default class Role extends Component {
 
     // 请求添加
     const result = await reqAddRole(this.parentId, roleName, roleDescription)
+    const logResult = await reqAddLog(0, cookieUtils.getUserCookie().username + '创建了名为' + roleName + '的角色', cookieUtils.getUserCookie().pk_user_id)
     // 根据结果提示/更新列表显示
     if (result.status === 0) {
       message.success('添加角色成功')
@@ -153,6 +152,7 @@ export default class Role extends Component {
       console.log(role.pk_role_id, menus)
       // 请求更新
       const result = await reqUpdateRoleRights(role.pk_role_id, menus)
+      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '更新了id为' + role.pk_role_id + '的角色权限', cookieUtils.getUserCookie().pk_user_id)
       console.log(result)
       if (result.status === 0) {
         let userRole = await reqUserRole(cookieUtils.getUserCookie().pk_user_id)
