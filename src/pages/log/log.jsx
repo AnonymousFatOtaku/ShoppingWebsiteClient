@@ -5,7 +5,8 @@ import moment from 'moment';
 import 'moment/locale/zh-cn';
 import locale from 'antd/lib/locale/zh_CN';
 import {formateDate} from "../../utils/dateUtils"
-import {reqLogs, reqSearchLogs} from "../../api/index";
+import {reqAddLog, reqLogs, reqSearchLogs} from "../../api/index";
+import cookieUtils from "../../utils/cookieUtils";
 
 const {RangePicker} = DatePicker;
 
@@ -69,8 +70,42 @@ export default class Order extends Component {
       }
       console.log(searchName, searchType, startTime, endTime)
       result = await reqSearchLogs({searchName, searchType, startTime, endTime})
+      if (searchName && !date) { // 仅根据关键字搜索
+        if (searchType === 'logId') {
+          const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了日志id为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+        } else if (searchType === 'operateType') {
+          const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了操作类型为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+        } else if (searchType === 'userId') {
+          const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了操作人id为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+        }
+      } else if (date && !searchName) { // 仅根据日期搜索
+        if (startTime === endTime) {
+          const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '的日志', cookieUtils.getUserCookie().pk_user_id)
+        } else {
+          const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '至' + endTime + '之间的日志', cookieUtils.getUserCookie().pk_user_id)
+        }
+      } else { // 同时根据关键字和日期搜索
+        if (startTime === endTime) {
+          if (searchType === 'logId') {
+            const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '日志id为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+          } else if (searchType === 'operateType') {
+            const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '操作类型为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+          } else if (searchType === 'userId') {
+            const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '操作人id为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+          }
+        } else {
+          if (searchType === 'logId') {
+            const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '至' + endTime + '日志id为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+          } else if (searchType === 'operateType') {
+            const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '至' + endTime + '操作类型为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+          } else if (searchType === 'userId') {
+            const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了' + startTime + '至' + endTime + '操作人id为' + searchName + '的日志', cookieUtils.getUserCookie().pk_user_id)
+          }
+        }
+      }
     } else {
       result = await reqLogs()
+      const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了全部日志', cookieUtils.getUserCookie().pk_user_id)
     }
     console.log(result)
     this.setState({loading: false}) // 隐藏loading
