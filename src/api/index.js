@@ -105,6 +105,13 @@ export const reqAddLog = (operateType, operate_content, pk_user_id) => ajax('/lo
   operate_content,
   pk_user_id
 }, 'POST')
+// 根据条件搜索日志列表
+export const reqSearchLogs = ({searchName, searchType, startTime, endTime}) => ajax('/log/searchLogs', {
+  searchName,
+  searchType,
+  startTime,
+  endTime
+})
 // 获取展示给用户的商品列表
 export const reqUserProduct = (pageNum, pageSize) => ajax('/manage/userProduct/list', {pageNum, pageSize})
 // 根据商品名称/商品描述搜索商品分页列表，搜索的类型：productName/productDesc

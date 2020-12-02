@@ -1,8 +1,13 @@
-// 订单管理路由
+// 日志管理路由
 import React, {Component} from "react";
-import {Button, Card, Space, Table, Modal, Select, Input, Form, message, InputNumber} from 'antd';
+import {Button, Card, Table, Select, Input, DatePicker, Space, ConfigProvider,} from 'antd';
+import moment from 'moment';
+import 'moment/locale/zh-cn';
+import locale from 'antd/lib/locale/zh_CN';
 import {formateDate} from "../../utils/dateUtils"
-import {reqLogs} from "../../api/index";
+import {reqLogs, reqSearchLogs} from "../../api/index";
+
+const {RangePicker} = DatePicker;
 
 export default class Order extends Component {
 
@@ -10,7 +15,8 @@ export default class Order extends Component {
     logs: [], // 所有订单列表
     loading: false, // 是否正在加载中
     searchName: '', // 搜索的关键字
-    searchType: 'productId', // 根据哪个字段搜索
+    searchType: 'logId', // 根据哪个字段搜索
+    date: null, // 日期
   };
 
   formRef = React.createRef();
@@ -49,11 +55,20 @@ export default class Order extends Component {
   // 获取订单列表数据显示
   getLogs = async () => {
     this.setState({loading: true}) // 显示loading
-    const {searchName, searchType} = this.state
-    console.log(searchName, searchType)
+    const {searchName, searchType, date} = this.state
+    console.log(searchName, searchType, date)
+
     let result
-    if (searchName) { // 如果搜索关键字有值说明要做搜索
-      // result = await reqSearchOrders({searchName, searchType})
+    if (searchName || date) { // 如果搜索关键字有值说明要做搜索
+      let startTime, endTime
+      if (date) {
+        // 格式化时间
+        startTime = date[0].format('YYYY-MM-DD')
+        endTime = date[1].format('YYYY-MM-DD')
+        console.log(startTime, endTime)
+      }
+      console.log(searchName, searchType, startTime, endTime)
+      result = await reqSearchLogs({searchName, searchType, startTime, endTime})
     } else {
       result = await reqLogs()
     }
@@ -79,31 +94,42 @@ export default class Order extends Component {
   render() {
 
     // 取出状态数据
-    const {loading, logs, searchType, searchName} = this.state
+    const {loading, logs, searchType, searchName, date} = this.state
     const {Option} = Select;
+
+    // 设置默认的起始日期
+    const disabledDate = (current) => {
+      console.log(current)
+      return current > moment().endOf('day');
+    }
 
     // 顶部左侧搜索栏
     const title = (
       <span>
         <Select style={{width: 200, marginRight: 20}} value={searchType}
                 onChange={value => this.setState({searchType: value})}>
-          <Option value='productId'>根据订单id搜索</Option>
-          <Option value='userId'>根据用户id搜索</Option>
+          <Option value='logId'>根据日志id搜索</Option>
+          <Option value='operateType'>根据操作类型搜索</Option>
+          <Option value='userId'>根据操作人id搜索</Option>
         </Select>
         <Input placeholder='关键字' style={{width: 200, marginRight: 20}} value={searchName}
                onChange={event => this.setState({searchName: event.target.value})}/>
-        <Button type='primary' onClick={() => this.getOrders()}>搜索</Button>
+        <RangePicker disabledDate={disabledDate} value={date}
+                     onChange={value => this.setState({date: value})}/>&nbsp;&nbsp;&nbsp;&nbsp;
+        <Button type='primary' onClick={() => this.getLogs()}>搜索</Button>
       </span>
     )
 
     return (
-      <Card title={title}>
-        <Table columns={this.columns} dataSource={logs} bordered rowKey='pk_log_id' loading={loading}
-               style={{height: 613}}
-               pagination={{
-                 current: this.pageNum, defaultPageSize: 8, showQuickJumper: true, onChange: this.getOrders
-               }}/>
-      </Card>
+      <ConfigProvider locale={locale}>
+        <Card title={title}>
+          <Table columns={this.columns} dataSource={logs} bordered rowKey='pk_log_id' loading={loading}
+                 style={{height: 613}}
+                 pagination={{
+                   current: this.pageNum, defaultPageSize: 8, showQuickJumper: true, onChange: this.getOrders
+                 }}/>
+        </Card>
+      </ConfigProvider>
     )
   }
 }
