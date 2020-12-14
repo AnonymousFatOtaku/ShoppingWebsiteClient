@@ -136,7 +136,7 @@ export const reqSearchLogs = ({searchName, searchType, startTime, endTime}) => a
 // 获取当前IP所在地天气
 export const reqWeather = () => {
   return new Promise((resolve, reject) => {
-    const url = `https://v0.yiketianqi.com/api?version=v61&appid=56683117&appsecret=qnX1AML8`
+    const url = `https://v0.yiketianqi.com/api?version=v61&appid=49951693&appsecret=ZPVM6jNp`
     // 发送jsonp请求
     jsonp(url, {}, (err, data) => {
       if (!err && data) { // 如果没有错误且有获取到数据
