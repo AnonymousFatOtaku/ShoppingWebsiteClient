@@ -117,16 +117,18 @@ class AdminSider extends Component {
                 订单管理
               </Link>
             </Menu.Item> : null}
-          <Menu.Item key="/promotion" icon={<BarsOutlined/>}>
-            <Link to='/promotion'>
-              活动管理
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/log" icon={<BarsOutlined/>}>
-            <Link to='/log'>
-              日志管理
-            </Link>
-          </Menu.Item>
+          {menus.indexOf(23) != -1 ?
+            <Menu.Item key="/promotion" icon={<BarsOutlined/>}>
+              <Link to='/promotion'>
+                活动管理
+              </Link>
+            </Menu.Item> : null}
+          {menus.indexOf(28) != -1 ?
+            <Menu.Item key="/log" icon={<BarsOutlined/>}>
+              <Link to='/log'>
+                日志管理
+              </Link>
+            </Menu.Item> : null}
         </Menu>
       </div>
     )

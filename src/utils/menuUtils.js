@@ -38,10 +38,12 @@ const menuUtils = [
   {
     name: '活动管理',
     path: '/promotion',
+    rightId: 23,
   },
   {
     name: '日志管理',
     path: '/log',
+    rightId: 28,
   },
 ]
 

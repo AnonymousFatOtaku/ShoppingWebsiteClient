@@ -7,7 +7,6 @@ import {
 } from 'antd'
 import menuList from '../../utils/menuUtils'
 import {reqRightsByRoleId} from "../../api";
-import cookieUtils from "../../utils/cookieUtils";
 
 const {TreeNode} = Tree;
 
@@ -25,11 +24,6 @@ export default class AuthForm extends PureComponent {
 
   constructor(props) {
     super(props)
-    // 根据传入角色的menus生成初始状态
-    // const {menus} = this.props.role
-    // this.state = {
-    //   checkedKeys: menus
-    // }
   }
 
   // 为父组件提交获取最新menus数据的方法
@@ -87,18 +81,18 @@ export default class AuthForm extends PureComponent {
   render() {
 
     const {role} = this.props
-    console.log(role)
+    // console.log(role)
     let {menus} = this.state
     menus = menus.toString()
     menus = menus.split(',')
-    console.log(menus)
+    // console.log(menus)
     let {checkedKeys} = this.state
     checkedKeys = checkedKeys.toString()
     checkedKeys = checkedKeys.split(',')
     if (checkedKeys.indexOf("1") === -1) {
       checkedKeys.push("1")
     }
-    console.log(checkedKeys, checkedKeys.length)
+    // console.log(checkedKeys, checkedKeys.length)
 
     return (
       <div>

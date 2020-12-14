@@ -52,7 +52,7 @@ export default class ProductInfo extends Component {
     )
 
     return (
-      <Card title={title} style={{height: 727}}>
+      <Card title={title} style={{minHeight: 727}}>
         <List>
           <List.Item>
             商品名称:&nbsp;&nbsp;
@@ -79,8 +79,7 @@ export default class ProductInfo extends Component {
           </List.Item>
           <List.Item>
             商品详情:&nbsp;&nbsp;
-            <span dangerouslySetInnerHTML={{__html: description}}>
-            </span>
+            <span dangerouslySetInnerHTML={{__html: description}}/>
           </List.Item>
         </List>
       </Card>

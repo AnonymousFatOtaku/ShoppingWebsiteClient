@@ -5,7 +5,14 @@ import {
   PlusOutlined,
   ArrowRightOutlined,
 } from '@ant-design/icons';
-import {reqCategorys, reqUpdateCategory, reqAddCategory, reqAddLog} from '../../api'
+import {
+  reqCategorys,
+  reqUpdateCategory,
+  reqAddCategory,
+  reqAddLog,
+  reqSearchProducts,
+  reqDeleteCategory
+} from '../../api'
 import {formateDate} from "../../utils/dateUtils"
 import cookieUtils from "../../utils/cookieUtils";
 
@@ -20,6 +27,7 @@ export default class Category extends Component {
     subCategorys: [], // 二级分类列表
     parentId: 0, // 当前需要显示的分类列表的父分类ID
     parentName: '', // 当前需要显示的分类列表的父分类名称
+    confirmLoading: false, // 表单按钮是否转圈
   };
 
   formRef = React.createRef();
@@ -54,11 +62,44 @@ export default class Category extends Component {
         render: (category) => ( // 返回需要显示的界面标签
           <span>
             <a onClick={() => this.showUpdateCategory(category)}>修改分类&nbsp;&nbsp;&nbsp;&nbsp;</a>
-            {this.state.parentId === 0 ? <a onClick={() => this.showSubCategorys(category)}>查看子分类</a> : null}
+            {this.state.parentId === 0 ?
+              <a onClick={() => this.showSubCategorys(category)}>查看子分类&nbsp;&nbsp;&nbsp;&nbsp;</a> : null}
+            <a onClick={() => this.deleteCategory(category)}>删除</a>
           </span>
         )
       }
     ]
+  }
+
+  // 删除指定分类
+  deleteCategory = (category) => {
+    console.log(category)
+    Modal.confirm({
+      title: `确认删除分类'${category.name}'吗?`,
+      onOk: async () => {
+        const categorysResult = await reqCategorys(category.pk_category_id)
+        console.log(categorysResult.data)
+        if (categorysResult.data.length > 0) {
+          message.error('不能删除包含二级分类的一级分类')
+        } else {
+          const productsResult = await reqSearchProducts({
+            searchName: category.pk_category_id,
+            searchType: 'categoryId'
+          })
+          console.log(productsResult)
+          if (productsResult.data.length > 0) {
+            message.error('不能删除包含商品的分类')
+          } else {
+            const result = await reqDeleteCategory(category.pk_category_id)
+            reqAddLog(1, cookieUtils.getUserCookie().username + '删除了id为' + category.pk_category_id + '的分类', cookieUtils.getUserCookie().pk_user_id)
+            if (result.status === 0) {
+              message.success('删除分类成功')
+              this.getCategorys()
+            }
+          }
+        }
+      }
+    })
   }
 
   // 异步获取一级/二级分类列表显示
@@ -125,11 +166,15 @@ export default class Category extends Component {
 
     // 获取到选中的父类ID和输入的新分类名
     let parentId = this.parentId
-    const {categoryName, categoryDescription} = this.formRef.current.getFieldsValue({
+    let {categoryName, categoryDescription} = this.formRef.current.getFieldsValue({
       categoryName: String,
       categoryDescription: String
     })
     console.log(parentId, categoryName, categoryDescription)
+
+    if (categoryDescription === undefined) {
+      categoryDescription = ''
+    }
 
     let {categorys} = this.state
     // 判定目前新增的是一级分类还是二级分类，undefined或0即为一级分类
@@ -160,6 +205,11 @@ export default class Category extends Component {
     if (categoryName === null || categoryName === undefined || categoryName.indexOf(' ') === 0 || categoryName === "") {
       message.error('分类名称不能为空或以空格开头');
     } else {
+
+      this.setState({
+        confirmLoading: true
+      })
+
       if (parentId === undefined) {
         parentId = 0
       }
@@ -181,7 +231,8 @@ export default class Category extends Component {
       }
       // 隐藏确认框
       this.setState({
-        visible: 0
+        visible: 0,
+        confirmLoading: false,
       })
     }
   };
@@ -197,6 +248,7 @@ export default class Category extends Component {
 
   // 更新分类
   updateCategory = async () => {
+
     // 准备数据
     let categoryId = this.category.pk_category_id
     let {categoryName, categoryDescription} = this.formRef.current.getFieldsValue({
@@ -220,7 +272,7 @@ export default class Category extends Component {
       // console.log("一级分类")
       for (let i = 0; i < categorys.length; i++) { // 判定新增的用户是否已存在
         // console.log(categorys[i].name)
-        if (categoryName === categorys[i].name) {
+        if (categoryName != this.category.name && categoryName === categorys[i].name) { // 修改后的分类名重名
           message.error('该分类已存在');
           return
         }
@@ -243,6 +295,9 @@ export default class Category extends Component {
     if (categoryName === null || categoryName === undefined || categoryName.indexOf(' ') === 0 || categoryName === "") {
       message.error('分类名称未作修改或为空/以空格开头');
     } else {
+      this.setState({
+        confirmLoading: true
+      })
       console.log(categoryName, categoryDescription, categoryId)
       // 提交修改分类的请求
       const result = await reqUpdateCategory({categoryName, categoryDescription, categoryId})
@@ -251,13 +306,14 @@ export default class Category extends Component {
       if (result.status === 0) {
         // 重新显示列表
         this.getCategorys()
-        message.success('分类"' + this.category.name + '"已修改为"' + categoryName + '"');
+        message.success('分类修改成功');
       } else { // 修改失败也要弹出消息提示
-        message.error('分类修改失败请检查后重试');
+        message.error('分类修改失败，请检查后重试');
       }
       // 隐藏确定框
       this.setState({
-        visible: 0
+        visible: 0,
+        confirmLoading: false,
       })
     }
   }
@@ -284,7 +340,7 @@ export default class Category extends Component {
 
   render() {
     // 读取状态数据
-    const {visible, categorys, subCategorys, parentId, parentName, loading} = this.state
+    const {visible, categorys, subCategorys, parentId, parentName, loading, confirmLoading} = this.state
     // 读取指定的分类
     const category = this.category || {} // 如果还没有则指定一个空对象
 
@@ -309,9 +365,10 @@ export default class Category extends Component {
         {/* 顶部左侧标题在一/二级分类下显示不同内容，通过loading设置页面加载状态，通过pagination设置分页 */}
         <Table columns={this.columns} dataSource={parentId === 0 ? categorys : subCategorys} bordered
                rowKey='pk_category_id'
-               loading={loading} pagination={{defaultPageSize: 8, showQuickJumper: true}} style={{height: 613}}/>
+               loading={loading} pagination={{showQuickJumper: true}} style={{height: 613}}/>
         {/* 通过destroyOnClose在Modal关闭后清空内容 */}
-        <Modal title="添加分类" visible={visible === 1} onOk={this.addCategory} onCancel={this.handleCancel} destroyOnClose>
+        <Modal title="添加分类" visible={visible === 1} onOk={this.addCategory} onCancel={this.handleCancel} destroyOnClose
+               confirmLoading={confirmLoading}>
           {/* <Modal/>和Form一起配合使用时，设置destroyOnClose也不会在Modal关闭时销毁表单字段数据，需要设置<Form preserve={false}/> */}
           <Form preserve={false} ref={this.formRef}>
             <Form.Item label="所属分类：">
@@ -332,15 +389,13 @@ export default class Category extends Component {
             ]}>
               <Input placeholder="请输入分类名称(15字以内)" maxLength={15}/>
             </Form.Item>
-            <Form.Item name="categoryDescription" label="分类描述：" rules={[
-              {whitespace: true, message: '分类描述不能为空或以空格开头'}
-            ]}>
+            <Form.Item name="categoryDescription" label="分类描述：">
               <TextArea maxLength={100} rows={4} placeholder='请输入角色描述(100字以内)'/>
             </Form.Item>
           </Form>
         </Modal>
         <Modal title="更新分类" visible={visible === 2} onOk={this.updateCategory} onCancel={this.handleCancel}
-               destroyOnClose>
+               destroyOnClose confirmLoading={confirmLoading}>
           <Form preserve={false} ref={this.formRef}>
             {/* 设置whitespace为true禁止纯空格 */}
             <Form.Item name="categoryName" label="分类名称：" rules={[
@@ -348,9 +403,7 @@ export default class Category extends Component {
             ]}>
               <Input placeholder="请输入分类名称(15字以内)" defaultValue={category.name} maxLength={15}/>
             </Form.Item>
-            <Form.Item name="categoryDescription" label="分类描述：" rules={[
-              {whitespace: true, message: '分类描述不能为空或以空格开头'}
-            ]}>
+            <Form.Item name="categoryDescription" label="分类描述：">
               <TextArea maxLength={100} rows={4} placeholder='请输入角色描述(100字以内)' defaultValue={category.description}/>
             </Form.Item>
           </Form>

@@ -11,8 +11,10 @@ export default class Order extends Component {
     orders: [], // 所有订单列表
     loading: false, // 是否正在加载中
     searchName: '', // 搜索的关键字
-    searchType: 'productId', // 根据哪个字段搜索
+    searchType: 'orderId', // 根据哪个字段搜索
     visible: false,
+    buttonLoading: false, // 按钮是否转圈
+    confirmLoading: false, // 表单按钮是否转圈
   };
 
   formRef = React.createRef();
@@ -85,12 +87,18 @@ export default class Order extends Component {
     console.log(searchName, searchType)
     let result
     if (searchName) { // 如果搜索关键字有值说明要做搜索
+      this.setState({
+        buttonLoading: true
+      })
       result = await reqSearchOrders({searchName, searchType})
-      if (searchType === 'productId') {
-        const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了订单id为' + searchName + '的订单', cookieUtils.getUserCookie().pk_user_id)
+      if (searchType === 'orderId') {
+        await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了订单id为' + searchName + '的订单', cookieUtils.getUserCookie().pk_user_id)
       } else if (searchType === 'userId') {
-        const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了用户id为' + searchName + '的订单', cookieUtils.getUserCookie().pk_user_id)
+        await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了用户id为' + searchName + '的订单', cookieUtils.getUserCookie().pk_user_id)
       }
+      this.setState({
+        buttonLoading: false
+      })
     } else {
       result = await reqOrders()
       const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了全部订单', cookieUtils.getUserCookie().pk_user_id)
@@ -170,12 +178,22 @@ export default class Order extends Component {
       this.setState({
         visible: true
       })
+    } else if (order.payment === null) {
+      message.error('请输入订单总价');
+      this.setState({
+        visible: true
+      })
     } else if (order.payment < 0 || order.payment > 100000000) {
       message.error('订单总价不能小于0或大于1亿');
       this.setState({
         visible: true
       })
     } else { // 所有验证都通过才执行修改操作
+
+      this.setState({
+        confirmLoading: true
+      })
+
       // 重置所有输入内容
       this.formRef.current.resetFields()
       // 提交添加的请求
@@ -187,7 +205,8 @@ export default class Order extends Component {
         this.getOrders()
       }
       this.setState({
-        visible: false
+        visible: false,
+        confirmLoading: false,
       })
     }
   }
@@ -203,7 +222,7 @@ export default class Order extends Component {
   render() {
 
     // 取出状态数据
-    const {loading, orders, searchType, searchName, visible} = this.state
+    const {loading, orders, searchType, searchName, visible, buttonLoading, confirmLoading} = this.state
     let order = this.order || {}
     console.log(order)
     const {Option} = Select;
@@ -213,12 +232,12 @@ export default class Order extends Component {
       <span>
         <Select style={{width: 200, marginRight: 20}} value={searchType}
                 onChange={value => this.setState({searchType: value})}>
-          <Option value='productId'>根据订单id搜索</Option>
+          <Option value='orderId'>根据订单id搜索</Option>
           <Option value='userId'>根据用户id搜索</Option>
         </Select>
         <Input placeholder='关键字' style={{width: 200, marginRight: 20}} value={searchName}
                onChange={event => this.setState({searchName: event.target.value})}/>
-        <Button type='primary' onClick={() => this.getOrders()}>搜索</Button>
+        <Button type='primary' onClick={() => this.getOrders()} loading={buttonLoading}>搜索</Button>
       </span>
     )
 
@@ -227,24 +246,29 @@ export default class Order extends Component {
         <Table columns={this.columns} dataSource={orders} bordered rowKey='pk_order_id' loading={loading}
                style={{height: 613}}
                pagination={{
-                 current: this.pageNum, defaultPageSize: 9, showQuickJumper: true, onChange: this.getOrders
+                 current: this.pageNum, showQuickJumper: true, onChange: this.getOrders
                }}/>
-        <Modal title='修改订单' visible={visible} onOk={this.updateOrder} onCancel={this.handleCancel} destroyOnClose>
+        <Modal title='修改订单' visible={visible} onOk={this.updateOrder} onCancel={this.handleCancel} destroyOnClose
+               confirmLoading={confirmLoading}>
           <Form preserve={false} ref={this.formRef}>
             <Form.Item name="name" label="买家名字：">
-              <Input placeholder="请输入买家名字" style={{width: 400, float: "right"}} defaultValue={order.name}/>
+              <Input placeholder="请输入买家名字" style={{width: 400, float: "right"}} defaultValue={order.name}
+                     maxLength={15}/>
             </Form.Item>
             <Form.Item name="phone" label="买家电话：" rules={[
               {min: 11, max: 11, message: '手机号长度应为11位'},
               {pattern: /^1[3456789]\d{9}$/, message: '手机号格式不正确'},
             ]}>
-              <Input placeholder="请输入买家电话" style={{width: 400, float: "right"}} defaultValue={order.phone}/>
+              <Input placeholder="请输入买家电话" style={{width: 400, float: "right"}} defaultValue={order.phone}
+                     maxLength={11}/>
             </Form.Item>
             <Form.Item name="address" label="买家地址：">
-              <Input placeholder="请输入买家地址" style={{width: 400, float: "right"}} defaultValue={order.address}/>
+              <Input placeholder="请输入买家地址" style={{width: 400, float: "right"}} defaultValue={order.address}
+                     maxLength={100}/>
             </Form.Item>
             <Form.Item name="payment" label="订单总价：">
-              <InputNumber placeholder="请输入订单总价" style={{width: 400, float: "right"}} defaultValue={order.payment}/>
+              <InputNumber placeholder="请输入订单总价" style={{width: 400, float: "right"}} defaultValue={order.payment}
+                           maxLength={12}/>
             </Form.Item>
           </Form>
         </Modal>

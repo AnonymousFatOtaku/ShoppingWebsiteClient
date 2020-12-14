@@ -5,6 +5,21 @@ import {Editor} from 'react-draft-wysiwyg'
 import draftToHtml from 'draftjs-to-html'
 import htmlToDraft from 'html-to-draftjs'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
+import MediaComponent from './media-component'
+
+function myBlockRenderer(contentBlock) {
+  const type = contentBlock.getType();
+  // 图片类型转换为mediaComponent
+  if (type === 'atomic') {
+    return {
+      component: MediaComponent,
+      editable: false,
+      props: {
+        foo: 'bar',
+      },
+    };
+  }
+}
 
 // 用来指定商品详情的富文本编辑器组件
 export default class RichTextEditor extends Component {
@@ -47,15 +62,20 @@ export default class RichTextEditor extends Component {
   }
 
   uploadImageCallBack = (file) => {
+    console.log(file)
     return new Promise(
       (resolve, reject) => {
         const xhr = new XMLHttpRequest()
-        xhr.open('POST', '/manage/img/upload')
+        xhr.open('POST', '/upload/uploadImage')
+        // 设置请求头
+        xhr.setRequestHeader('Token', localStorage.getItem('token'));
         const data = new FormData()
         data.append('image', file)
         xhr.send(data)
+        console.log(xhr)
         xhr.addEventListener('load', () => {
           const response = JSON.parse(xhr.responseText)
+          console.log(response)
           const url = response.data.url // 获取图片的url
           resolve({data: {link: url}})
         })
@@ -72,11 +92,9 @@ export default class RichTextEditor extends Component {
     return (
       <Editor
         editorState={editorState}
-        editorStyle={{border: '1px solid black', minHeight: 200, paddingLeft: 10}}
+        editorStyle={{border: '1px solid black', minHeight: 250, maxHeight: 250, paddingLeft: 10}}
         onEditorStateChange={this.onEditorStateChange}
-        toolbar={{
-          image: {uploadCallback: this.uploadImageCallBack, alt: {present: true, mandatory: true}},
-        }}
+        blockRendererFn={myBlockRenderer}
       />
     )
   }

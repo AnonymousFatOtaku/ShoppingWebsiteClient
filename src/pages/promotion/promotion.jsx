@@ -42,6 +42,7 @@ export default class User extends Component {
     visibleProducts: false, // 活动商品窗口是否可见
     mockData: [],
     targetKeys: [],
+    confirmLoading: false, // 表单按钮是否转圈
   };
 
   formRef = React.createRef();
@@ -138,18 +139,36 @@ export default class User extends Component {
   // 显示修改界面
   showUpdate = (promotion) => {
     this.promotion = promotion
-    this.setState({
-      visible: true
-    })
+
+    let curDate = new Date();
+    curDate = formateDate(curDate)
+    let endTime = formateDate(promotion.end_time)
+
+    if (endTime < curDate) { // 结束时间早于当前时间
+      message.error('不能修改已结束的活动');
+    } else {
+      this.setState({
+        visible: true
+      })
+    }
   }
 
   // 显示活动商品界面
   showProducts = (promotion) => {
     this.promotion = promotion
-    this.setState({
-      visibleProducts: true
-    })
-    this.getMock(promotion)
+
+    let curDate = new Date();
+    curDate = formateDate(curDate)
+    let endTime = formateDate(promotion.end_time)
+
+    if (endTime < curDate) { // 结束时间早于当前时间
+      message.error('不能修改已结束的活动');
+    } else {
+      this.setState({
+        visibleProducts: true
+      })
+      this.getMock(promotion)
+    }
   }
 
   handleCancel = () => {
@@ -219,6 +238,9 @@ export default class User extends Component {
     if (discount === null || discount === undefined || discount === "") {
       message.error('折扣格式不正确');
       return
+    } else if (discount === 0 || discount >= 100) {
+      message.error('折扣不能低于1或高于99');
+      return
     }
     if (description === undefined) {
       description = ""
@@ -240,12 +262,17 @@ export default class User extends Component {
     }
     // 重置所有输入内容
     this.formRef.current.resetFields()
+
+    this.setState({
+      confirmLoading: true
+    })
+
     // 提交添加/修改的请求
     const result = await reqAddOrUpdatePromotion(promotion)
     if (this.promotion) {
-      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + promotion.pk_promotion_id + '的活动', cookieUtils.getUserCookie().pk_user_id)
+      await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + promotion.pk_promotion_id + '的活动', cookieUtils.getUserCookie().pk_user_id)
     } else {
-      const logResult = await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了名为' + name + '的活动', cookieUtils.getUserCookie().pk_user_id)
+      await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了名为' + name + '的活动', cookieUtils.getUserCookie().pk_user_id)
     }
     // 若添加成功则刷新列表显示
     if (result.status === 0) {
@@ -254,7 +281,8 @@ export default class User extends Component {
     }
 
     this.setState({
-      visible: false
+      visible: false,
+      confirmLoading: false,
     })
   }
 
@@ -330,6 +358,7 @@ export default class User extends Component {
 
   // 设置活动商品
   setPromotionProducts = async () => {
+
     // 收集输入数据
     let products = this.formRef.current.getFieldsValue({products: Object})
     // console.log(products, products.products)
@@ -355,7 +384,7 @@ export default class User extends Component {
     message.success('设置活动商品成功')
 
     this.setState({
-      visibleProducts: false
+      visibleProducts: false,
     })
   }
 
@@ -369,7 +398,7 @@ export default class User extends Component {
 
   render() {
 
-    let {promotions, visible, visibleProducts} = this.state
+    let {promotions, visible, visibleProducts, confirmLoading} = this.state
     console.log(promotions)
 
     let promotion = this.promotion || {}
@@ -396,10 +425,9 @@ export default class User extends Component {
     return (
       <ConfigProvider locale={locale}>
         <Card title={title}>
-          <Table columns={this.columns} dataSource={promotions} bordered style={{height: 613}}
-                 pagination={{defaultPageSize: 8}}/>
+          <Table columns={this.columns} dataSource={promotions} bordered style={{height: 613}}/>
           <Modal title={promotion.pk_promotion_id ? '修改活动' : '新增活动'} visible={visible} onOk={this.addOrUpdatePromotion}
-                 onCancel={this.handleCancel} destroyOnClose>
+                 onCancel={this.handleCancel} destroyOnClose confirmLoading={confirmLoading}>
             <Form preserve={false} ref={this.formRef}>
               <Form.Item name="name" label="活动名：">
                 <Input placeholder="请输入活动名(15字以内)" maxLength={15} defaultValue={promotion.name}/>
@@ -409,7 +437,7 @@ export default class User extends Component {
               </Form.Item>
               <Form.Item name="discount" label="折扣：">
                 <InputNumber min={0} max={99} formatter={value => `${value}%`} parser={value => value.replace('%', '')}
-                             style={{width: 402}} defaultValue={promotion.discount}/>
+                             style={{width: 402}} defaultValue={promotion.discount} maxLength={3}/>
               </Form.Item>
               <Form.Item name="time" label="活动时间：">
                 <RangePicker showTime style={{width: 402}} disabledDate={disabledDate}
@@ -418,7 +446,7 @@ export default class User extends Component {
             </Form>
           </Modal>
           <Modal title={'设置活动商品'} visible={visibleProducts} onOk={this.setPromotionProducts}
-                 onCancel={this.handleCancel} destroyOnClose>
+                 onCancel={this.handleCancel} destroyOnClose confirmLoading={confirmLoading}>
             <Form preserve={false} ref={this.formRef}>
               <Form.Item name="products">
                 <Transfer

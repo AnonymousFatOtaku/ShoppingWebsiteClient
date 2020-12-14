@@ -18,6 +18,8 @@ export default class Order extends Component {
     searchName: '', // 搜索的关键字
     searchType: 'logId', // 根据哪个字段搜索
     date: null, // 日期
+    current: 1, // 当前页码
+    buttonLoading: false, // 按钮是否转圈
   };
 
   formRef = React.createRef();
@@ -31,6 +33,23 @@ export default class Order extends Component {
       {
         title: '操作类型',
         dataIndex: 'operate_type',
+        render: (operate_type) => {
+          if (operate_type === 0) {
+            return <span>添加</span>
+          } else if (operate_type === 1) {
+            return <span>删除</span>
+          } else if (operate_type === 2) {
+            return <span>修改</span>
+          } else if (operate_type === 3) {
+            return <span>查询</span>
+          } else if (operate_type === 4) {
+            return <span>登录</span>
+          } else if (operate_type === 5) {
+            return <span>注册</span>
+          } else if (operate_type === 6) {
+            return <span>退出</span>
+          }
+        }
       },
       {
         title: '操作内容',
@@ -61,6 +80,11 @@ export default class Order extends Component {
 
     let result
     if (searchName || date) { // 如果搜索关键字有值说明要做搜索
+
+      this.setState({
+        buttonLoading: true
+      })
+
       let startTime, endTime
       if (date) {
         // 格式化时间
@@ -103,6 +127,10 @@ export default class Order extends Component {
           }
         }
       }
+
+      this.setState({
+        buttonLoading: false
+      })
     } else {
       result = await reqLogs()
       const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了全部日志', cookieUtils.getUserCookie().pk_user_id)
@@ -118,6 +146,13 @@ export default class Order extends Component {
     }
   }
 
+  onChange = page => {
+    console.log(page);
+    this.setState({
+      current: page,
+    });
+  };
+
   componentWillMount() {
     this.initColumns()
   }
@@ -129,7 +164,7 @@ export default class Order extends Component {
   render() {
 
     // 取出状态数据
-    const {loading, logs, searchType, searchName, date} = this.state
+    const {loading, logs, searchType, searchName, date, buttonLoading} = this.state
     const {Option} = Select;
 
     // 设置默认的起始日期
@@ -151,7 +186,7 @@ export default class Order extends Component {
                onChange={event => this.setState({searchName: event.target.value})}/>
         <RangePicker disabledDate={disabledDate} value={date}
                      onChange={value => this.setState({date: value})}/>&nbsp;&nbsp;&nbsp;&nbsp;
-        <Button type='primary' onClick={() => this.getLogs()}>搜索</Button>
+        <Button type='primary' onClick={() => this.getLogs()} loading={buttonLoading}>搜索</Button>
       </span>
     )
 
@@ -161,7 +196,7 @@ export default class Order extends Component {
           <Table columns={this.columns} dataSource={logs} bordered rowKey='pk_log_id' loading={loading}
                  style={{height: 613}}
                  pagination={{
-                   current: this.pageNum, defaultPageSize: 8, showQuickJumper: true, onChange: this.getOrders
+                   current: this.state.current, showQuickJumper: true, onChange: this.onChange
                  }}/>
         </Card>
       </ConfigProvider>

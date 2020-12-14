@@ -34,12 +34,27 @@ export const reqUserRole = (pk_user_id) => ajax('/role/getRoleByUserId', {pk_use
 export const reqUsers = () => ajax('/user/getAllUsers')
 // 获取用户角色关联信息
 export const reqUserRoles = () => ajax('/role/getUserRoles')
+// 删除一个角色
+export const reqDeleteRole = (pk_role_id) => ajax('/role/deleteRole', {pk_role_id}, 'POST')
+// 根据角色id获取所属用户
+export const reqUsersByRoleId = (fk_role_id) => ajax('/role/getUsersByRoleId', {fk_role_id},)
 // 删除指定用户
 export const reqDeleteUser = (pk_user_id) => ajax('/user/deleteUser', {pk_user_id}, 'POST')
 // 添加/更新用户
 export const reqAddOrUpdateUser = (user) => ajax('/user/' + (user.pk_user_id ? 'updateUser' : 'addUser'), user, 'POST')
 // 修改用户权限
 export const reqUpdateUserRole = (user) => ajax('/user/updateUserRole', user, 'POST')
+// 根据信息获取用户
+export const reqUserByUsernameAndPhoneAndEmail = (username, phone, email) => ajax('/user/getUserByUsernameAndPhoneAndEmail', {
+  username,
+  phone,
+  email
+})
+// 修改用户密码
+export const reqUpdateUserPassword = (password, pk_user_id) => ajax('/user/updateUserPassword', {
+  password,
+  pk_user_id
+}, 'POST')
 // 获取一级/二级分类的列表
 export const reqCategorys = (parent_category_id) => ajax('/category/getCategoriesByParentId', {parent_category_id})
 // 添加分类
@@ -54,6 +69,8 @@ export const reqUpdateCategory = ({categoryName, categoryDescription, categoryId
   categoryDescription,
   categoryId
 }, 'POST')
+// 获所有分类的列表
+export const reqAllCategorys = () => ajax('/category/getAllCategories')
 // 添加/修改商品
 export const reqAddOrUpdateProduct = (product) => ajax('/product/' + (product.pk_product_id ? 'updateProduct' : 'addProduct'), product, 'POST')
 // 获取商品分页列表
@@ -62,8 +79,12 @@ export const reqProducts = () => ajax('/product/getAllProducts')
 export const reqUpdateStatus = (productId, status) => ajax('/product/updateStatus', {productId, status}, 'POST')
 // 根据商品名称/商品描述搜索商品分页列表，搜索的类型：productName/productDesc
 export const reqSearchProducts = ({searchName, searchType}) => ajax('/product/searchProducts', {searchName, searchType})
+// 删除一个商品
+export const reqDeleteProduct = (pk_product_id) => ajax('/product/deleteProduct', {pk_product_id}, 'POST')
 // 获取一个分类
 export const reqCategory = (categoryId) => ajax('/category/getCategoryById', {categoryId})
+// 删除一个分类
+export const reqDeleteCategory = (pk_category_id) => ajax('/category/deleteCategory', {pk_category_id}, 'POST')
 // 获取所有活动的列表
 export const reqPromotions = () => ajax('/promotion/getAllPromotions')
 // 添加/更新活动

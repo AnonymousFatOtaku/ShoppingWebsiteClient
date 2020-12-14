@@ -4,7 +4,6 @@ import {Upload, Modal, message} from 'antd'
 import {
   PlusOutlined,
 } from '@ant-design/icons';
-import {reqDeleteImg} from '../../api'
 
 // 图片格式及大小验证
 function beforeUpload(file, fileList) {
@@ -43,7 +42,7 @@ export default class PicturesWall extends React.Component {
     if (imgs) { // 如果传入了imgs属性
       imgs = imgs.split(",");
       console.log(imgs)
-      if(imgs.length > 0){
+      if (imgs.length > 0) {
         fileList = imgs.map((img, index) => ({
           uid: -index, // 每个file都有自己唯一的id
           name: img, // 图片文件名
@@ -80,6 +79,7 @@ export default class PicturesWall extends React.Component {
   // file：当前操作(上传/删除)的图片文件，fileList：所有已上传图片文件对象的数组
   handleChange = async ({file, fileList}) => {
     // console.log('handleChange()', file.status, fileList.length, file === fileList[fileList.length - 1])
+    console.log(file, fileList)
     // 一旦上传成功修正当前上传的file的信息(name,url)
     if (file.status === 'done') { // 上传图片
       const result = file.response
@@ -102,6 +102,7 @@ export default class PicturesWall extends React.Component {
       //   message.error('删除图片失败')
       // }
     }
+    console.log(file, fileList)
     // 在操作(上传/删除)过程中更新fileList状态
     this.setState({fileList})
   };

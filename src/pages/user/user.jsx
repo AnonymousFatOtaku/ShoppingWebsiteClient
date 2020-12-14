@@ -9,10 +9,14 @@ import {
   reqRoles,
   reqUserRole,
   reqUserRoles,
-  reqUpdateUserRole, reqAddLog
+  reqUpdateUserRole,
+  reqAddLog,
+  reqUserByUsernameAndPhoneAndEmail,
+  reqUpdateUserPassword,
 } from "../../api/index";
 import cookieUtils from "../../utils/cookieUtils";
 import './user.less'
+import md5 from 'js-md5'
 
 export default class User extends Component {
 
@@ -20,8 +24,9 @@ export default class User extends Component {
     users: [], // 所有用户列表
     roles: [], // 所有角色列表
     visible: false,
-    visibleRole: false,
+    visiblePassword: false,
     userRoles: [],
+    confirmLoading: false, // 表单按钮是否转圈
   };
 
   formRef = React.createRef();
@@ -60,8 +65,30 @@ export default class User extends Component {
         dataIndex: 'login_count'
       },
       {
-        title: '用户权限标识',
-        dataIndex: 'type'
+        title: '用户权限',
+        render: (user) => {
+          let {roles, userRoles} = this.state
+
+          let roleId
+          if (user != {}) {
+            for (let i = 0; i < userRoles.length; i++) {
+              if (user.pk_user_id === userRoles[i].fk_user_id) {
+                roleId = userRoles[i].fk_role_id
+              }
+            }
+          }
+
+          let roleName
+          if (roles) {
+            for (let i = 0; i < roles.length; i++) {
+              if (roleId === roles[i].pk_role_id) {
+                roleName = roles[i].name
+              }
+            }
+          }
+          console.log(roleId, roleName)
+          return <span>{roleName}</span>
+        }
       },
       {
         title: '创建时间',
@@ -72,14 +99,13 @@ export default class User extends Component {
         title: '修改时间',
         dataIndex: 'gmt_modified',
         render: formateDate
-        // render: (role_id) => this.roleNames[role_id]
       },
       {
         title: '操作',
         render: (user) => (
           <span>
             <a onClick={() => this.showUpdate(user)}>修改资料&nbsp;&nbsp;&nbsp;&nbsp;</a>
-            <a onClick={() => this.showRoleUpdate(user)}>修改权限&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a onClick={() => this.showPasswordUpdate(user)}>修改密码&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.deleteUser(user)}>删除</a>
           </span>
         )
@@ -103,16 +129,17 @@ export default class User extends Component {
     })
   }
 
-  // 显示权限修改界面
-  showRoleUpdate = (user) => {
+  // 显示密码修改界面
+  showPasswordUpdate = (user) => {
     this.user = user // 保存user
     this.setState({
-      visibleRole: true
+      visiblePassword: true
     })
   }
 
-  // 权限修改
-  roleUpdate = async () => {
+  // 密码修改
+  passwordUpdate = async () => {
+
     // 收集输入数据
     const user = this.formRef.current.getFieldsValue({user: Object})
 
@@ -122,41 +149,41 @@ export default class User extends Component {
     }
     console.log(user, this.user)
 
-    // 如果是修改则获取当前用户角色id
-    let roleId
-    if (this.user) {
-      let result = await reqUserRole(user.pk_user_id)
-      roleId = result.data[0].fk_role_id
-      if (user.role_id === undefined) {
-        user.role_id = roleId
-      }
-    }
-    console.log(user)
+    let uapReg = /^[a-zA-Z0-9_]{3,12}$/
+    if (!uapReg.test(user.newPassword) || user.newPassword === undefined) {
+      message.error('新密码只能由3-12个英文、数字或下划线组成');
+    } else if (!uapReg.test(user.confirmPassword) || user.confirmPassword === undefined) {
+      message.error('确认密码只能由3-12个英文、数字或下划线组成');
+    } else if (user.confirmPassword !== user.newPassword) {
+      message.error('新密码与确认密码不一致，请检查后重新输入');
+    } else {
 
-    if (this.user && user.role_id === undefined) {
-      message.error('请选择角色');
       this.setState({
-        visible: true
+        confirmLoading: true
       })
-    } else if (this.user && roleId === 1 && user.role_id != 1) {
-      message.error('超级管理员不能修改自身角色');
-      this.setState({
-        visible: true
-      })
-    } else { // 所有验证都通过才执行添加/修改操作
+
       // 重置所有输入内容
       this.formRef.current.resetFields()
       // 提交修改权限的请求
-      const result = await reqUpdateUserRole(user)
-      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + user.pk_user_id + '的用户权限', cookieUtils.getUserCookie().pk_user_id)
-      // 刷新列表显示
+      const result = await reqUpdateUserPassword(user.newPassword, user.pk_user_id)
       if (result.status === 0) {
-        message.success('修改用户权限成功')
-        this.getUsers()
+        await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + user.pk_user_id + '的用户密码', cookieUtils.getUserCookie().pk_user_id)
+        // 如果修改的是当前登录用户的密码则强制退出重新登录
+        if (user.pk_user_id === cookieUtils.getUserCookie().pk_user_id) {
+          // 删除保存的user数据和token
+          cookieUtils.removeUserCookie()
+          localStorage.removeItem('token')
+          message.success('当前用户密码修改成功，请重新登录')
+          this.props.history.replace('/AdminLogin')
+        } else {
+          message.success('修改用户密码成功')
+          this.setState({
+            visiblePassword: false,
+            confirmLoading: true,
+          })
+          window.location.reload(true)
+        }
       }
-      this.setState({
-        visibleRole: false
-      })
     }
   }
 
@@ -186,16 +213,15 @@ export default class User extends Component {
 
   // 添加/修改用户
   addOrUpdateUser = async () => {
+
     // 收集输入数据
     const user = this.formRef.current.getFieldsValue({user: Object})
 
     // 判定是否是修改，如果是修改则要给未改动的参数赋原值
+    let roleId
     if (this.user) {
       if (user.username === undefined) {
         user.username = this.user.username
-      }
-      if (user.password === undefined) {
-        user.password = this.user.password
       }
       if (user.phone === undefined) {
         user.phone = this.user.phone
@@ -205,6 +231,11 @@ export default class User extends Component {
       }
       if (user.pk_user_id === undefined) {
         user.pk_user_id = this.user.pk_user_id
+      }
+      let result = await reqUserRole(user.pk_user_id)
+      roleId = result.data[0].fk_role_id
+      if (user.role_id === undefined) {
+        user.role_id = roleId
       }
     }
     console.log(user, this.user)
@@ -218,7 +249,7 @@ export default class User extends Component {
       this.setState({
         visible: true
       })
-    } else if (!uapReg.test(user.password) || user.password === undefined) {
+    } else if (!this.user && (!uapReg.test(user.password) || user.password === undefined)) {
       message.error('密码只能由3-12个英文、数字或下划线组成');
       this.setState({
         visible: true
@@ -233,7 +264,16 @@ export default class User extends Component {
       this.setState({
         visible: true
       })
+    } else if (user.role_id === undefined) {
+      message.error('请选择角色');
+    } else if (this.user && roleId === 1 && user.role_id != 1) {
+      message.error('不能修改超级管理员角色');
     } else { // 所有验证都通过才执行添加/修改操作
+
+      this.setState({
+        confirmLoading: true
+      })
+
       const {users} = this.state
       // console.log(users, typeof users, users.length, users[0])
       // 新增之前先判定新增的用户是否已存在
@@ -250,21 +290,33 @@ export default class User extends Component {
       this.formRef.current.resetFields()
       // 提交添加的请求
       const result = await reqAddOrUpdateUser(user)
-      if (this.user) {
-        const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + user.pk_user_id + '的用户', cookieUtils.getUserCookie().pk_user_id)
-      } else {
-        const logResult = await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了名为' + user.username + '的用户', cookieUtils.getUserCookie().pk_user_id)
-      }
-      // 刷新列表显示
       if (result.status === 0) {
-        message.success(`${this.user ? '修改' : '添加'}用户成功`)
-        this.getUsers()
+        // 新用户添加后先获取id再添加权限
+        if (!this.user) {
+          const userResult = await reqUserByUsernameAndPhoneAndEmail(user.username, user.phone, user.email)
+          console.log(userResult.data[0].pk_user_id)
+          user.pk_user_id = userResult.data[0].pk_user_id
+        }
+        const roleResult = await reqUpdateUserRole(user)
+        if (this.user) {
+          await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + user.pk_user_id + '的用户', cookieUtils.getUserCookie().pk_user_id)
+        } else {
+          await reqAddLog(0, cookieUtils.getUserCookie().username + '新增了名为' + user.username + '的用户', cookieUtils.getUserCookie().pk_user_id)
+        }
+        // 刷新列表显示
+        if (roleResult.status === 0) {
+          message.success(`${this.user ? '修改' : '添加'}用户成功`)
+          this.getUsers()
+        }
+        this.setState({
+          visible: false,
+          confirmLoading: false
+        })
+        // 新增/修改用户后强制刷新整个页面
+        window.location.reload(true)
       } else if (result.status === 1) {
         message.error('用户信息已存在');
       }
-      this.setState({
-        visible: false
-      })
     }
   }
 
@@ -316,13 +368,13 @@ export default class User extends Component {
     this.formRef.current.resetFields()
     this.setState({
       visible: false,
-      visibleRole: false,
+      visiblePassword: false,
     });
   };
 
   render() {
 
-    let {users, roles, visible, visibleRole, userRoles} = this.state
+    let {users, roles, visible, visiblePassword, userRoles, confirmLoading} = this.state
     let user = this.user || {}
     console.log(users, user)
     console.log(roles)
@@ -332,10 +384,20 @@ export default class User extends Component {
     if (user != {}) {
       for (let i = 0; i < userRoles.length; i++) {
         if (user.pk_user_id === userRoles[i].fk_user_id) {
-          roleId = userRoles[i].fk_role_id - 1
+          roleId = userRoles[i].fk_role_id
         }
       }
     }
+
+    let roleName
+    if (roles) {
+      for (let i = 0; i < roles.length; i++) {
+        if (roleId === roles[i].pk_role_id) {
+          roleName = roles[i].name
+        }
+      }
+    }
+    console.log(roleId, roleName)
 
     // 顶部左侧按钮
     const title = (
@@ -348,26 +410,27 @@ export default class User extends Component {
 
     return (
       <Card title={title}>
-        <Table columns={this.columns} dataSource={users} bordered style={{height: 613}}
-               pagination={{defaultPageSize: 8}}/>
+        <Table columns={this.columns} dataSource={users} bordered style={{height: 613}}/>
         <Modal title={user.pk_user_id ? '修改用户' : '添加用户'} visible={visible} onOk={this.addOrUpdateUser}
-               onCancel={this.handleCancel} destroyOnClose>
+               onCancel={this.handleCancel} destroyOnClose confirmLoading={confirmLoading}>
           <Form preserve={false} ref={this.formRef}>
             <Form.Item name="username" label="用户名：" rules={[
               {pattern: /^[a-zA-Z0-9_]{3,12}$/, message: '用户名只能由3-12个英文、数字或下划线组成'},
             ]}>
-              <Input placeholder="请输入用户名" style={{width: 400, float: "right"}} defaultValue={user.username}/>
+              <Input placeholder="请输入用户名" style={{width: 400, float: "right"}} defaultValue={user.username}
+                     maxLength={12}/>
             </Form.Item>
-            <Form.Item name="password" label="密码：" rules={[
+            {this.user ? null : <Form.Item name="password" label="密码：" rules={[
               {pattern: /^[a-zA-Z0-9_]{3,12}$/, message: '密码只能由3-12个英文、数字或下划线组成'},
             ]}>
-              <Input.Password type='password' placeholder="请输入密码" style={{width: 400, float: "right"}}/>
-            </Form.Item>
+              <Input.Password type='password' placeholder="请输入密码" style={{width: 400, float: "right"}} maxLength={12}/>
+            </Form.Item>}
             <Form.Item name="phone" label="手机号：" rules={[
               {min: 11, max: 11, message: '手机号长度应为11位'},
               {pattern: /^1[3456789]\d{9}$/, message: '手机号格式不正确'},
             ]}>
-              <Input placeholder="请输入手机号" style={{width: 400, float: "right"}} defaultValue={user.phone}/>
+              <Input placeholder="请输入手机号" style={{width: 400, float: "right"}} defaultValue={user.phone}
+                     maxLength={11}/>
             </Form.Item>
             <Form.Item name="email" label="邮箱：" rules={[
               {
@@ -377,18 +440,29 @@ export default class User extends Component {
             ]}>
               <Input placeholder="请输入邮箱" style={{width: 400, float: "right"}} defaultValue={user.email}/>
             </Form.Item>
+            <Form.Item name="role_id" label="角色：">
+              <Select placeholder="请选择角色" style={{width: 400, marginLeft: 2}} defaultValue={roleName}>
+                {
+                  roles.map(role => <Option key={role.pk_role_id} value={role.pk_role_id}>{role.name}</Option>)
+                }
+              </Select>
+            </Form.Item>
           </Form>
         </Modal>
-        <Modal title='修改权限' visible={visibleRole} onOk={this.roleUpdate} onCancel={this.handleCancel} destroyOnClose>
+        <Modal title='修改密码' visible={visiblePassword} onOk={this.passwordUpdate} onCancel={this.handleCancel}
+               destroyOnClose confirmLoading={confirmLoading}>
           <Form preserve={false} ref={this.formRef}>
-            {this.user != null ?
-              <Form.Item name="role_id" label="角色：">
-                <Select placeholder="请选择角色" style={{width: 400, marginLeft: 2}} defaultValue={roles[roleId].name}>
-                  {
-                    roles.map(role => <Option key={role.pk_role_id} value={role.pk_role_id}>{role.name}</Option>)
-                  }
-                </Select>
-              </Form.Item> : null}
+            <Form.Item name="newPassword" label="新密码：" rules={[
+              {pattern: /^[a-zA-Z0-9_]{3,12}$/, message: '密码只能由3-12个英文、数字或下划线组成'},
+            ]}>
+              <Input.Password type='password' placeholder="请输入新密码" style={{width: 400, float: "right"}} maxLength={12}/>
+            </Form.Item>
+            <Form.Item name="confirmPassword" label="确认密码：" rules={[
+              {pattern: /^[a-zA-Z0-9_]{3,12}$/, message: '密码只能由3-12个英文、数字或下划线组成'},
+            ]}>
+              <Input.Password type='password' placeholder="请再次输入新密码" style={{width: 400, float: "right"}}
+                              maxLength={12}/>
+            </Form.Item>
           </Form>
         </Modal>
       </Card>
