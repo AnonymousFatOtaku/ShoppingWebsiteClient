@@ -3,10 +3,8 @@ import React, {Component} from "react";
 import {
   Button,
   Card,
-  Space,
   Table,
   Modal,
-  Select,
   Input,
   Form,
   message,
@@ -292,7 +290,7 @@ export default class User extends Component {
       title: `确认删除${promotion.name}活动吗?`,
       onOk: async () => {
         const result = await reqDeletePromotion(promotion.pk_promotion_id)
-        const logResult = await reqAddLog(1, cookieUtils.getUserCookie().username + '删除了名为' + promotion.name + '的活动', cookieUtils.getUserCookie().pk_user_id)
+        await reqAddLog(1, cookieUtils.getUserCookie().username + '删除了名为' + promotion.name + '的活动', cookieUtils.getUserCookie().pk_user_id)
         if (result.status === 0) {
           message.success('删除活动成功')
           this.getPromotions()
@@ -379,8 +377,8 @@ export default class User extends Component {
     }
 
     // console.log(products)
-    let data = await reqSetPromotionProducts(products, this.promotion.pk_promotion_id)
-    const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '设置了id为' + this.promotion.pk_promotion_id + '的活动商品', cookieUtils.getUserCookie().pk_user_id)
+    await reqSetPromotionProducts(products, this.promotion.pk_promotion_id)
+    await reqAddLog(2, cookieUtils.getUserCookie().username + '设置了id为' + this.promotion.pk_promotion_id + '的活动商品', cookieUtils.getUserCookie().pk_user_id)
     message.success('设置活动商品成功')
 
     this.setState({

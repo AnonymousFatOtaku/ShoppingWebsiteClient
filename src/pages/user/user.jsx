@@ -1,6 +1,6 @@
 // 用户管理路由
 import React, {Component} from "react";
-import {Button, Card, Space, Table, Modal, Select, Input, Form, message} from 'antd';
+import {Button, Card, Table, Modal, Select, Input, Form, message} from 'antd';
 import {formateDate} from "../../utils/dateUtils"
 import {
   reqDeleteUser,
@@ -16,7 +16,6 @@ import {
 } from "../../api/index";
 import cookieUtils from "../../utils/cookieUtils";
 import './user.less'
-import md5 from 'js-md5'
 
 export default class User extends Component {
 

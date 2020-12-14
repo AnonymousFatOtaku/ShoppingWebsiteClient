@@ -52,7 +52,7 @@ export default class Product extends Component {
       {
         title: '商品售价',
         dataIndex: 'price',
-        render: (price) => '¥' + price  // 当前指定了对应的属性，传入的是对应的属性值
+        render: (price) => '¥' + price / 100  // 当前指定了对应的属性，传入的是对应的属性值
       },
       {
         title: '创建时间',
@@ -132,8 +132,8 @@ export default class Product extends Component {
       result = await reqSearchProducts({searchName, searchType})
       if (searchType === 'productName') {
         await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了商品名为' + searchName + '的商品', cookieUtils.getUserCookie().pk_user_id)
-      } else if (searchType === 'categoryId') {
-        await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了分类id为' + searchName + '的商品', cookieUtils.getUserCookie().pk_user_id)
+      } else if (searchType === 'categoryName') {
+        await reqAddLog(3, cookieUtils.getUserCookie().username + '搜索了分类名称为' + searchName + '的商品', cookieUtils.getUserCookie().pk_user_id)
       }
     } else { // 一般分页请求
       result = await reqProducts()
@@ -209,7 +209,7 @@ export default class Product extends Component {
         <Select style={{width: 200, marginRight: 20}} value={searchType}
                 onChange={value => this.setState({searchType: value})}>
           <Option value='productName'>按名称搜索</Option>
-          <Option value='categoryId'>按分类id搜索</Option>
+          <Option value='categoryName'>按分类名称搜索</Option>
         </Select>
         <Input placeholder='关键字' style={{width: 200, marginRight: 20}} value={searchName}
                onChange={event => this.setState({searchName: event.target.value})}/>

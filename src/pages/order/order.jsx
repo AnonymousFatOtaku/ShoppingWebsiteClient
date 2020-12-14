@@ -70,7 +70,7 @@ export default class Order extends Component {
           <span>
             <a onClick={async () => {
               this.props.history.push('/order/info', {order})
-              const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了id为' + order.pk_order_id + '的订单详情', cookieUtils.getUserCookie().pk_user_id)
+              await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了id为' + order.pk_order_id + '的订单详情', cookieUtils.getUserCookie().pk_user_id)
             }}>查看详情&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.showUpdate(order)}>修改订单&nbsp;&nbsp;&nbsp;&nbsp;</a>
             <a onClick={() => this.deleteOrder(order)}>删除订单</a>
@@ -101,7 +101,7 @@ export default class Order extends Component {
       })
     } else {
       result = await reqOrders()
-      const logResult = await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了全部订单', cookieUtils.getUserCookie().pk_user_id)
+      await reqAddLog(3, cookieUtils.getUserCookie().username + '查看了全部订单', cookieUtils.getUserCookie().pk_user_id)
     }
     console.log(result)
     this.setState({loading: false}) // 隐藏loading
@@ -121,7 +121,7 @@ export default class Order extends Component {
       title: `确认删除编号为${order.pk_order_id}的订单吗?`,
       onOk: async () => {
         const result = await reqDeleteOrder(order.pk_order_id)
-        const logResult = await reqAddLog(1, cookieUtils.getUserCookie().username + '删除了id为' + order.pk_order_id + '的订单', cookieUtils.getUserCookie().pk_user_id)
+        await reqAddLog(1, cookieUtils.getUserCookie().username + '删除了id为' + order.pk_order_id + '的订单', cookieUtils.getUserCookie().pk_user_id)
         if (result.status === 0) {
           message.success('删除订单成功')
           this.getOrders()
@@ -198,7 +198,7 @@ export default class Order extends Component {
       this.formRef.current.resetFields()
       // 提交添加的请求
       const result = await reqUpdateOrder(order.name, order.phone, order.address, order.payment, order.pk_order_id)
-      const logResult = await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + order.pk_order_id + '的订单', cookieUtils.getUserCookie().pk_user_id)
+      await reqAddLog(2, cookieUtils.getUserCookie().username + '修改了id为' + order.pk_order_id + '的订单', cookieUtils.getUserCookie().pk_user_id)
       // 刷新列表显示
       if (result.status === 0) {
         message.success(`订单${order.pk_order_id}修改成功`)

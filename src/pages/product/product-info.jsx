@@ -60,7 +60,7 @@ export default class ProductInfo extends Component {
           </List.Item>
           <List.Item>
             商品价格:&nbsp;&nbsp;
-            <span>{price}元</span>
+            <span>{price / 100}元</span>
           </List.Item>
           <List.Item>
             所属分类:&nbsp;&nbsp;

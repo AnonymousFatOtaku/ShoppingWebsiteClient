@@ -59,7 +59,7 @@ class AdminHeader extends Component {
       content: '是否确认退出?',
       onOk: async () => {
         // 删除保存的user数据和token
-        const logResult = await reqAddLog(6, cookieUtils.getUserCookie().username + '退出登录', cookieUtils.getUserCookie().pk_user_id)
+        await reqAddLog(6, cookieUtils.getUserCookie().username + '退出登录', cookieUtils.getUserCookie().pk_user_id)
         cookieUtils.removeUserCookie()
         localStorage.removeItem('token')
         // 跳转到login

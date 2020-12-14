@@ -235,7 +235,7 @@ export default class ProductAddUpdate extends Component {
           <Form.Item name="price" label="商品价格：" rules={[
             {pattern: /^[0-9]{1,12}$/, message: '商品价格只能由1-12个数字组成'},
           ]}>
-            <Input placeholder="请输入商品价格" style={{width: 400}} addonAfter="元" defaultValue={product.price}
+            <Input placeholder="请输入商品价格" style={{width: 400}} addonAfter="分" defaultValue={product.price}
                    maxLength={12}/>
           </Form.Item>
           <Form.Item name="categoryIds" label="商品分类：">

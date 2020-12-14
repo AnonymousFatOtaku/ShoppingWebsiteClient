@@ -7,7 +7,6 @@ import logo from '../../assets/images/logo.gif'
 import './user_login.less'
 import {reqUserLogin} from '../../api/index'
 import memoryUtils from "../../utils/memoryUtils";
-import storageUtils from "../../utils/storageUtils";
 import cookieUtils from "../../utils/cookieUtils";
 
 export default class Login extends Component {

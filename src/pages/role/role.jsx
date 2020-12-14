@@ -265,16 +265,16 @@ export default class Role extends Component {
         <Modal title="添加角色" visible={isShowAdd} onOk={this.addRole} onCancel={this.onCancel} destroyOnClose
                confirmLoading={confirmLoading}>
           <Form preserve={false} ref={this.formRef} style={{height: 200}}>
-            <Form.Item label="父角色ID：" style={{float: "right"}}>
-              <Select defaultValue="0" style={{width: 389}} placeholder="请选择父级角色ID" onSelect={(value) => {
+            <Form.Item label="父角色：" style={{float: "right"}}>
+              <Select defaultValue="0" style={{width: 389}} placeholder="请选择父级角色" onSelect={(value) => {
                 this.parentId = value
                 // console.log(this.parentId)
               }}>
-                <Option value='0'>0</Option>
+                <Option value='0'>无</Option>
                 {/* 遍历角色列表 */}
                 {
                   roles.map(role => <Option value={role.pk_role_id}
-                                            key={role.pk_role_id}>{role.pk_role_id}</Option>)
+                                            key={role.pk_role_id}>{role.name}</Option>)
                 }
               </Select>
             </Form.Item>

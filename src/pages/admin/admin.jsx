@@ -13,7 +13,7 @@ import Promotion from "../promotion/promotion";
 import Order from "../order/index";
 import ProductInfo from '../product/product-info'
 import Log from "../log/log";
-// import NotFound from '../not-found/not-found'
+import NotFound from '../not-found/not-found'
 import './admin.less';
 import cookieUtils from "../../utils/cookieUtils";
 
@@ -36,11 +36,6 @@ export default class Admin extends Component {
     if (!user || !user.pk_user_id) {
       return <Redirect to='/AdminLogin'/>
     }
-
-    // const {menus} = this.state
-
-    // console.log(user)
-    // console.log(menus)
 
     return (
       <Layout className="admin">
@@ -73,7 +68,7 @@ export default class Admin extends Component {
               </Route>
               <Route path="/ProductInfo" component={ProductInfo}> </Route>
               <Route path='/log' component={Log}></Route>
-              {/*<Route component={NotFound}/>*/}
+              <Route component={NotFound}/>
             </Switch>
           </Content>
           <Footer className="adminFooter">欢迎使用后台管理系统</Footer>

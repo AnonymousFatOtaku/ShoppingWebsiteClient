@@ -1,6 +1,5 @@
 // 用户登录的路由组件
 import React, {Component} from 'react'
-import {Redirect} from 'react-router-dom'
 import {Form, Input, Button, message} from 'antd';
 import logo from '../../assets/images/logo.gif'
 import './register.less'

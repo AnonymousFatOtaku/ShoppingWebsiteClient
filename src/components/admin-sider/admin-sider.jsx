@@ -1,12 +1,8 @@
 // 后台管理主路由左侧导航组件
 import React, {Component} from "react";
-import {Link, Redirect, withRouter} from "react-router-dom";
+import {Link, withRouter} from "react-router-dom";
 import {Menu} from 'antd';
 import {
-  PieChartOutlined,
-  BarChartOutlined,
-  LineChartOutlined,
-  AreaChartOutlined,
   BarsOutlined,
   HomeOutlined,
   UserOutlined,
@@ -20,7 +16,6 @@ import {reqRights} from '../../api'
 import logo from '../../assets/images/logo.gif';
 import './admin-sider.less';
 import cookieUtils from "../../utils/cookieUtils";
-
 
 // 子菜单
 const {SubMenu} = Menu;
